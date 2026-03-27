@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Release Delivery Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="header-text">
+                    <h1>🚀 Release Delivery Tracker</h1>
+                    <p class="subtitle">Track and analyze release delivery metrics</p>
+                    <div id="userInfo" class="user-info" hidden style="margin-top: 1rem; display: flex; align-items: center; gap: 1rem; justify-content: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1rem 2rem; border-radius: 12px; border: 2px solid rgba(255, 255, 255, 0.3); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);">
+                        <span style="font-weight: 700; color: #fff; font-size: 1rem;">You are connected to JIRA as:</span>
+                        <div class="user-avatar">
+                            <img id="userAvatar" src="" alt="User avatar" />
+                            <span id="userInitials" class="user-initials"></span>
+                        </div>
+                        <div class="user-details">
+                            <span id="userName" class="user-name"></span>
+                            <span id="userEmail" class="user-email"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <a href="index.html" class="btn btn-secondary">← Back to Home</a>
+                    <a href="release_delivery_config.html" class="btn btn-setup" aria-label="Open configuration page">
+                        ⚙️ Configuration
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <!-- Connection Status Section -->
+            <section class="connection-section" id="connectionSection">
+                <h2>🔄 Connecting to Jira...</h2>
+                <div id="connectionStatus" class="connection-status" role="alert" aria-live="polite">
+                    <p>Please wait while we establish a connection to your Jira server...</p>
+                </div>
+            </section>
+
+            <!-- Main Content Section -->
+            <section class="query-section" id="querySection" hidden>
+                <div class="card">
+                    <h2>Release Delivery Analysis</h2>
+                    <form id="releaseForm" class="form">
+                        <div class="form-group">
+                            <label for="projectGroupSelect">Project Groups</label>
+                            <select id="projectGroupSelect" name="projectGroupSelect" class="form-control" multiple size="6" required>
+                                <option value="">Loading project groups...</option>
+                            </select>
+                            <small id="projectGroupSelectHelp">
+                                Select one or more project groups. <a href="release_delivery_config.html" style="color: #667eea;">Manage project groups</a>
+                            </small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="releaseGroupsSelect">Release Groups</label>
+                            <select id="releaseGroupsSelect" name="releaseGroupsSelect" class="form-control" multiple size="6">
+                                <option value="">Loading release groups...</option>
+                            </select>
+                            <small id="releaseGroupsHelp">
+                                Select one or more saved groups. <a href="release_delivery_config.html" style="color: #667eea;">Manage release groups</a>
+                            </small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="releaseVersion">Analysis Label</label>
+                            <input 
+                                type="text" 
+                                id="releaseVersion" 
+                                name="releaseVersion" 
+                                placeholder="e.g., Q1 2026 Release Analysis"
+                                class="form-control"
+                            >
+                            <small>Optional label for this analysis report</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: 400;">
+                                <input 
+                                    type="checkbox" 
+                                    id="showFixVersionsCheckbox" 
+                                    name="showFixVersions"
+                                    style="margin: 0; width: 18px; height: 18px; cursor: pointer;"
+                                >
+                                <span style="cursor: pointer;">Show Fix Versions in Report</span>
+                            </label>
+                            <small>Include a column showing the fix versions (releases) for each release group</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: 400;">
+                                <input 
+                                    type="checkbox" 
+                                    id="showJqlCheckbox" 
+                                    name="showJql"
+                                    style="margin: 0; width: 18px; height: 18px; cursor: pointer;"
+                                >
+                                <span style="cursor: pointer;">Show JQL Query in Report</span>
+                            </label>
+                            <small>Include a column showing the JQL query used for each release group</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: 400;">
+                                <input 
+                                    type="checkbox" 
+                                    id="filterDoneStatusCheckbox" 
+                                    name="filterDoneStatus"
+                                    checked
+                                    style="margin: 0; width: 18px; height: 18px; cursor: pointer;"
+                                >
+                                <span style="cursor: pointer;">Only Show Completed Issues (Done Status)</span>
+                            </label>
+                            <small>Filter to only include issues with status category = Done</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: 400;">
+                                <input 
+                                    type="checkbox" 
+                                    id="calculateKickBackRatioCheckbox" 
+                                    name="calculateKickBackRatio"
+                                    checked
+                                    style="margin: 0; width: 18px; height: 18px; cursor: pointer;"
+                                >
+                                <span style="cursor: pointer;">Calculate Kick Back Ratio</span>
+                            </label>
+                            <small>Include Kick Back Ratio metrics in the analysis</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: 400;">
+                                <input
+                                    type="checkbox"
+                                    id="calculateTimeAnalysisCheckbox"
+                                    name="calculateTimeAnalysis"
+                                    style="margin: 0; width: 18px; height: 18px; cursor: pointer;"
+                                >
+                                <span style="cursor: pointer;">Calculate Time Analysis</span>
+                            </label>
+                        </div>
+
+                        <div id="timeAnalysisOptions" class="form-group" style="display: none; margin-left: 2rem; padding-left: 1rem; border-left: 3px solid #667eea;">
+                            <div style="margin-bottom: 0.75rem;">
+                                <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: 400;">
+                                    <input
+                                        type="checkbox"
+                                        id="includeStatusGroupCheckbox"
+                                        name="includeStatusGroup"
+                                        checked
+                                        style="margin: 0; width: 18px; height: 18px; cursor: pointer;"
+                                    >
+                                    <span style="cursor: pointer;">Include Status Group</span>
+                                </label>
+                            </div>
+                            <div style="margin-bottom: 0.75rem;">
+                                <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: 400;">
+                                    <input
+                                        type="checkbox"
+                                        id="includeStatusDetailCheckbox"
+                                        name="includeStatusDetail"
+                                        style="margin: 0; width: 18px; height: 18px; cursor: pointer;"
+                                    >
+                                    <span style="cursor: pointer;">Include Status Detail</span>
+                                </label>
+                            </div>
+                            <div style="margin-bottom: 0.75rem;">
+                                <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: 400;">
+                                    <input
+                                        type="checkbox"
+                                        id="includeTotalTimeColumnsCheckbox"
+                                        name="includeTotalTimeColumns"
+                                        checked
+                                        style="margin: 0; width: 18px; height: 18px; cursor: pointer;"
+                                    >
+                                    <span style="cursor: pointer;">Include Total Time Columns</span>
+                                </label>
+                            </div>
+                            <div>
+                                <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: 400;">
+                                    <input
+                                        type="checkbox"
+                                        id="includeAverageColumnsCheckbox"
+                                        name="includeAverageColumns"
+                                        style="margin: 0; width: 18px; height: 18px; cursor: pointer;"
+                                    >
+                                    <span style="cursor: pointer;">Include Average Columns</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                📊 Analyze Release
+                            </button>
+                            <button type="reset" class="btn btn-secondary">
+                                🔄 Reset
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Results Section -->
+                <div id="resultsSection" class="results-section" hidden>
+                    <div class="card">
+                        <div class="results-header">
+                            <h2>Release Delivery Report</h2>
+                            <div class="export-actions">
+                                <button id="exportExcelBtn" class="btn btn-secondary">
+                                    📊 Export Excel
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="releaseResults"></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 Jira Integration Tool. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        let releaseGroupsCache = [];
+        const projectVersionsCache = new Map(); // cache projectKey -> Set(versionNameLower)
+        let lastAnalysisData = null;
+
+        function showMessage(message, type = 'info') {
+            let el = document.getElementById('statusMessage');
+            if (!el) {
+                el = document.createElement('div');
+                el.id = 'statusMessage';
+                el.className = 'status-message';
+                const container = document.querySelector('.container') || document.body;
+                container.insertBefore(el, container.firstChild);
+            }
+            el.textContent = message;
+            el.className = 'status-message ' + (type === 'error' ? 'error' : 'success');
+            el.style.display = 'block';
+            setTimeout(() => { el.style.display = 'none'; }, 5000);
+        }
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', () => {
+            const jiraUI = new JiraUI();
+            loadProjectGroups();
+            loadReleaseGroups();
+
+            // Handle time analysis options visibility
+            const calculateTimeAnalysisCheckbox = document.getElementById('calculateTimeAnalysisCheckbox');
+            const timeAnalysisOptions = document.getElementById('timeAnalysisOptions');
+            if (calculateTimeAnalysisCheckbox && timeAnalysisOptions) {
+                calculateTimeAnalysisCheckbox.addEventListener('change', () => {
+                    timeAnalysisOptions.style.display = calculateTimeAnalysisCheckbox.checked ? 'block' : 'none';
+                });
+            }
+
+            // Handle Excel export
+            const exportExcelBtn = document.getElementById('exportExcelBtn');
+            if (exportExcelBtn) {
+                exportExcelBtn.addEventListener('click', exportToExcel);
+            }
+
+            // Handle release form submission
+            const releaseForm = document.getElementById('releaseForm');
+            if (releaseForm) {
+                releaseForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    
+                    const releaseVersion = document.getElementById('releaseVersion').value;
+                    const projectGroupSelect = document.getElementById('projectGroupSelect');
+                    const selectedGroupIndices = Array.from(projectGroupSelect.selectedOptions).map(opt => opt.value).filter(Boolean);
+                    
+                    if (selectedGroupIndices.length === 0) {
+                        showMessage('Please select at least one project group', 'error');
+                        return;
+                    }
+
+                    // Get selected project groups
+                    const projectGroups = JSON.parse(localStorage.getItem('release_delivery_projectGroups') || '[]');
+                    const selectedProjectGroups = [];
+                    
+                    selectedGroupIndices.forEach(index => {
+                        const group = projectGroups[parseInt(index)];
+                        if (group && group.projects && group.projects.length > 0) {
+                            selectedProjectGroups.push({
+                                name: group.name,
+                                projects: group.projects,
+                                teamMembers: Number.isFinite(group.teamMembers) ? group.teamMembers : null
+                            });
+                        }
+                    });
+                    
+                    if (selectedProjectGroups.length === 0) {
+                        showMessage('Selected project groups have no projects', 'error');
+                        return;
+                    }
+                    const selectedGroupNames = getSelectedReleaseGroups();
+                    const showFixVersions = document.getElementById('showFixVersionsCheckbox')?.checked || false;
+                    const showJql = document.getElementById('showJqlCheckbox')?.checked || false;
+                    const filterDoneStatus = document.getElementById('filterDoneStatusCheckbox')?.checked || false;
+                    const calculateKickBackRatio = document.getElementById('calculateKickBackRatioCheckbox')?.checked || false;
+                    const calculateTimeAnalysis = document.getElementById('calculateTimeAnalysisCheckbox')?.checked || false;
+                    const includeStatusGroup = document.getElementById('includeStatusGroupCheckbox')?.checked || false;
+                    const includeStatusDetail = document.getElementById('includeStatusDetailCheckbox')?.checked || false;
+                    const includeTotalTimeColumns = document.getElementById('includeTotalTimeColumnsCheckbox')?.checked || false;
+                    const includeAverageColumns = document.getElementById('includeAverageColumnsCheckbox')?.checked || false;
+
+                    // Check if time analysis is selected but no display options are enabled
+                    if (calculateTimeAnalysis && !(includeStatusGroup || includeStatusDetail)) {
+                        showMessage('Time Analysis is checked but no display options are selected. Please enable "Include Status Group" or "Include Status Detail" to view the results.', 'error');
+                        return;
+                    }
+
+                    // Check if time analysis is selected but no status groups are configured
+                    if (calculateTimeAnalysis && (includeStatusGroup || includeStatusDetail)) {
+                        const statusGroups = getTimeStatusGroups();
+                        if (!statusGroups || statusGroups.length === 0) {
+                            showMessage('No status groups configured for time analysis. Please configure status groups in Time Analyzer Setup (time-analyzer-setup.html) first.', 'error');
+                            return;
+                        }
+                    }
+
+                    if (selectedGroupNames.length === 0) {
+                        showMessage('Please select at least one release group', 'error');
+                        return;
+                    }
+
+                    try {
+                        // Show loading state
+                        const resultsSection = document.getElementById('resultsSection');
+                        const resultsDiv = document.getElementById('releaseResults');
+                        resultsSection.hidden = false;
+                        resultsDiv.innerHTML = '<p>⏳ Analyzing release groups...</p>';
+
+                        const jiraClient = new JiraClient();
+                        const allSummary = [];
+
+                        // Process each project group individually
+                        for (const projectGroup of selectedProjectGroups) {
+                            const projectKeys = projectGroup.projects.map(p => p.key);
+                            const projectList = projectKeys.map(p => `"${p}"`).join(', ');
+
+                            // Analyze each release group for this project group
+                            for (const groupName of selectedGroupNames) {
+                                const groupReleases = getSelectedGroupReleases([groupName]);
+                                if (groupReleases.length === 0) continue;
+                                // ensure available releases for this project group are loaded
+                                // (this function will query JIRA via the existing JiraClient)
+                                // filtering is performed below
+                                
+
+
+                                        // Filter group releases to only those available for this project group
+                                const availableSet = await getAvailableReleasesForProjectGroup(projectGroup, jiraClient);
+                                const filteredReleases = groupReleases.filter(r => availableSet.has((r||'').toLowerCase()));
+                                if (filteredReleases.length === 0) {
+                                    // Nothing to query for this project group
+                                    console.log(`No matching releases for project group "${projectGroup.name}" / release group "${groupName}" after filtering available FixVersions`);
+                                    const resultsDiv = document.getElementById('releaseResults');
+                                    if (resultsDiv) resultsDiv.innerHTML += `<div style="color:#cc3300;">No matching FixVersions for release group <strong>${escapeHtml(groupName)}</strong> in project group <strong>${escapeHtml(projectGroup.name)}</strong>. Skipping.</div>`;
+                                    continue;
+                                }
+                                if (filteredReleases.length !== groupReleases.length) {
+                                    const removed = groupReleases.filter(r => !availableSet.has((r||'').toLowerCase()));
+                                    const resultsDiv = document.getElementById('releaseResults');
+                                    if (resultsDiv) resultsDiv.innerHTML += `<div style="color:#cc6600;">Removed ${removed.length} unavailable FixVersion(s) from release group <strong>${escapeHtml(groupName)}</strong> for project group <strong>${escapeHtml(projectGroup.name)}</strong>: ${escapeHtml(removed.join(', '))}</div>`;
+                                }
+
+                                const releaseValues = filteredReleases.map(escapeJqlValue).join(', ');
+                                let jql = `project in (${projectList}) AND fixVersion in (${releaseValues}) AND issuetype in (Story, Spike, Bug)`;
+                                if (filterDoneStatus) {
+                                    jql += ` AND statuscategory = Done`;
+                                }
+                                
+                                console.log(`Querying project group "${projectGroup.name}" for release group "${groupName}":`, jql);
+                                // Fetch changelog when time analysis is requested
+                                const data = await jiraClient.searchIssues(jql, 1000, calculateTimeAnalysis);
+
+                                // Aggregate by issue type
+                                            const stats = {
+                                    projectGroupName: projectGroup.name,
+                                    projectKeys: projectKeys,
+                                    projectGroupTeamMembers: Number.isFinite(projectGroup.teamMembers)
+                                        ? projectGroup.teamMembers
+                                        : null,
+                                    groupName,
+                                    fixVersions: filteredReleases,
+                                    jql: jql,
+                                    Story: { count: 0, storyPoints: 0 },
+                                    Spike: { count: 0, storyPoints: 0 },
+                                    Bug: { count: 0, storyPoints: 0 },
+                                    total: { count: 0, storyPoints: 0 },
+                                    // will be populated when Calculate Time Analysis is selected
+                                    timeByStatus: '',
+                                    timeByStatusGroup: {}, // statusGroupName -> ms
+                                    timeByIndividualStatus: {} // statusName -> ms
+                                };
+
+                                // Aggregate counts and (optionally) accumulate time-by-status
+                                const statusTotals = {}; // status -> ms
+                                (data.issues || []).forEach(issue => {
+                                    const issueType = issue.fields.issuetype?.name || 'Unknown';
+                                    const points = parseFloat(issue.fields.customfield_10200) || 0;
+
+                                    if (stats[issueType]) {
+                                        stats[issueType].count++;
+                                        stats[issueType].storyPoints += points;
+                                        stats.total.count++;
+                                        stats.total.storyPoints += points;
+                                    }
+
+                                    // Calculate per-issue status durations when requested
+                                    if (calculateTimeAnalysis) {
+                                        const durations = computeStatusDurations(issue);
+                                        durations.forEach(d => {
+                                            statusTotals[d.status] = (statusTotals[d.status] || 0) + d.durationMs;
+                                        });
+                                    }
+                                });
+
+                                // If time analysis requested, convert to human-readable string
+                                if (calculateTimeAnalysis) {
+                                    const parts = Object.entries(statusTotals)
+                                        .sort((a,b) => b[1] - a[1])
+                                        .map(([status, ms]) => `${status}: ${formatDuration(ms)}`);
+                                    stats.timeByStatus = parts.join('; ');
+                                    
+                                    // Store individual status times
+                                    stats.timeByIndividualStatus = { ...statusTotals };
+                                    
+                                    // Calculate time by status groups
+                                    const statusGroups = getTimeStatusGroups();
+                                    statusGroups.forEach(group => {
+                                        let groupTotal = 0;
+                                        group.statuses.forEach(statusName => {
+                                            const statusNameLower = statusName.toLowerCase();
+                                            // Sum up all status totals that match this status (case-insensitive)
+                                            Object.entries(statusTotals).forEach(([status, ms]) => {
+                                                if (status.toLowerCase() === statusNameLower) {
+                                                    groupTotal += ms;
+                                                }
+                                            });
+                                        });
+                                        stats.timeByStatusGroup[group.name] = groupTotal;
+                                    });
+                                }
+
+                                if (calculateKickBackRatio) {
+                                    const kickBackJql = `${jql} AND status was ReOpen`;
+                                    console.log(`Querying kick back ratio for "${projectGroup.name}" / "${groupName}":`, kickBackJql);
+                                    const kickBackData = await jiraClient.searchIssues(kickBackJql, 1000, false);
+                                    const kickBackCount = (kickBackData.issues || []).length;
+                                    stats.kickBack = {
+                                        count: kickBackCount,
+                                        ratio: stats.total.count ? (kickBackCount / stats.total.count) : null,
+                                        jql: kickBackJql
+                                    };
+                                }
+
+                                allSummary.push(stats);
+                            }
+                        }
+
+                        // Store data for export
+                        lastAnalysisData = {
+                            version: releaseVersion,
+                            selectedProjectGroups: selectedProjectGroups.map(g => g.name),
+                            groupNames: selectedGroupNames,
+                            summary: allSummary,
+                            showFixVersions: showFixVersions,
+                            showJql: showJql,
+                            filterDoneStatus: filterDoneStatus,
+                            calculateKickBackRatio: calculateKickBackRatio,
+                            calculateTimeAnalysis: calculateTimeAnalysis,
+                            includeStatusGroup: includeStatusGroup,
+                            includeStatusDetail: includeStatusDetail,
+                            includeTotalTimeColumns: includeTotalTimeColumns,
+                            includeAverageColumns: includeAverageColumns
+                        };
+
+                        // Display results
+                        displayReleaseGroupSummary(releaseVersion, allSummary, showFixVersions, showJql, calculateKickBackRatio, calculateTimeAnalysis, includeStatusGroup, includeStatusDetail, includeTotalTimeColumns, includeAverageColumns);
+                    } catch (error) {
+                        console.error('Error fetching release data:', error);
+                        showMessage('Failed to fetch release data: ' + error.message, 'error');
+                    }
+                });
+            }
+
+            // Handle reset
+            const resetBtn = releaseForm?.querySelector('[type="reset"]');
+            if (resetBtn) {
+                resetBtn.addEventListener('click', () => {
+                    document.getElementById('resultsSection').hidden = true;
+                    const groupSelect = document.getElementById('releaseGroupsSelect');
+                    if (groupSelect) {
+                        groupSelect.selectedIndex = -1;
+                    }
+                });
+            }
+        });
+
+        function loadProjectGroups() {
+            const select = document.getElementById('projectGroupSelect');
+            const helpText = document.getElementById('projectGroupSelectHelp');
+            const submitBtn = document.querySelector('#releaseForm [type="submit"]');
+            if (!select) return;
+
+            const projectGroups = JSON.parse(localStorage.getItem('release_delivery_projectGroups') || '[]');
+            if (projectGroups.length === 0) {
+                select.innerHTML = '<option value="">No project groups available</option>';
+                select.disabled = true;
+                if (helpText) {
+                    helpText.textContent = 'No project groups found. Create one in the configuration page.';
+                }
+                if (submitBtn) submitBtn.disabled = true;
+                return;
+            }
+
+            const options = [];
+            projectGroups.forEach((group, index) => {
+                const name = group.name || '';
+                const projectCount = group.projects?.length || 0;
+                if (!name) return;
+                options.push(`<option value="${index}">${escapeHtml(name)} (${projectCount} project${projectCount !== 1 ? 's' : ''})</option>`);
+            });
+
+            select.innerHTML = options.join('');
+            select.disabled = false;
+            if (submitBtn) submitBtn.disabled = false;
+        }
+
+        function loadReleaseGroups() {
+            const select = document.getElementById('releaseGroupsSelect');
+            const helpText = document.getElementById('releaseGroupsHelp');
+            if (!select) return;
+
+            const groups = JSON.parse(localStorage.getItem('release_delivery_releaseGroups') || '[]');
+            releaseGroupsCache = groups;
+
+            if (groups.length === 0) {
+                select.innerHTML = '<option value="">No saved release groups available</option>';
+                select.disabled = true;
+                if (helpText) {
+                    helpText.textContent = 'No saved release groups found. Add one in the configuration page.';
+                }
+                return;
+            }
+
+            const sorted = groups.slice().sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+            const options = sorted.map(group => {
+                const name = group.name || '';
+                const count = Array.isArray(group.releases) ? group.releases.length : 0;
+                return `<option value="${escapeHtml(name)}">${escapeHtml(name)} (${count})</option>`;
+            });
+
+            select.innerHTML = options.join('');
+            select.disabled = false;
+        }
+
+        function getTimeStatusGroups() {
+            const json = localStorage.getItem('time_status_groups');
+            if (!json) return [];
+            try {
+                const groups = JSON.parse(json);
+                // Sort by priority (lower number = higher priority)
+                return groups.sort((a, b) => (a.priority || 0) - (b.priority || 0));
+            } catch (e) {
+                console.error('Error parsing time status groups:', e);
+                return [];
+            }
+        }
+
+        function getSelectedReleaseGroups() {
+            const select = document.getElementById('releaseGroupsSelect');
+            if (!select || select.disabled) return [];
+            return Array.from(select.selectedOptions).map(option => option.value).filter(Boolean);
+        }
+
+        function getSelectedGroupReleases(groupNames) {
+            if (!Array.isArray(groupNames) || groupNames.length === 0) return [];
+            const nameSet = new Set(groupNames.map(name => name.toLowerCase()));
+            const releases = new Set();
+
+            releaseGroupsCache.forEach(group => {
+                const groupName = (group.name || '').toLowerCase();
+                if (!nameSet.has(groupName)) return;
+                (group.releases || []).forEach(release => releases.add(release));
+            });
+
+            return Array.from(releases);
+        }
+
+        async function getAvailableReleasesForProjectGroup(projectGroup, jiraClient) {
+            // Return Set of lowercased release names available across the group's projects
+            const available = new Set();
+            if (!projectGroup || !Array.isArray(projectGroup.projects) || projectGroup.projects.length === 0) return available;
+
+            for (const project of projectGroup.projects) {
+                const key = project.key;
+                if (!key) continue;
+                if (projectVersionsCache.has(key)) {
+                    const cached = projectVersionsCache.get(key);
+                    cached.forEach(v => available.add(v));
+                    continue;
+                }
+                try {
+                    const versions = await jiraClient.request(`/project/${encodeURIComponent(key)}/versions`);
+                    let arr = [];
+                    if (Array.isArray(versions)) arr = versions;
+                    else if (versions.values && Array.isArray(versions.values)) arr = versions.values;
+                    const names = new Set();
+                    arr.forEach(v => {
+                        if (v && v.name) {
+                            const n = v.name.toLowerCase();
+                            available.add(n);
+                            names.add(n);
+                        }
+                    });
+                    projectVersionsCache.set(key, names);
+                } catch (err) {
+                    console.warn(`Could not load versions for project ${key}:`, err);
+                }
+            }
+            return available;
+        }
+
+        function escapeJqlValue(value) {
+            const safe = String(value).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+            return `"${safe}"`;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function loadCountRanges() {
+            return JSON.parse(localStorage.getItem('release_delivery_countRanges') || '[]');
+        }
+
+        function getCountRangeColor(value) {
+            if (!Number.isFinite(value)) return null;
+            const ranges = loadCountRanges();
+            for (const range of ranges) {
+                if (value >= range.min && value <= range.max) {
+                    return range.color;
+                }
+            }
+            return null;
+        }
+
+        function loadSpRanges() {
+            return JSON.parse(localStorage.getItem('release_delivery_spRanges') || '[]');
+        }
+
+        function getSpRangeColor(value) {
+            if (!Number.isFinite(value)) return null;
+            const ranges = loadSpRanges();
+            for (const range of ranges) {
+                if (value >= range.min && value <= range.max) {
+                    return range.color;
+                }
+            }
+            return null;
+        }
+
+        function loadKickRanges() {
+            return JSON.parse(localStorage.getItem('release_delivery_kickRanges') || '[]');
+        }
+
+        function getKickRangeColor(percentage) {
+            if (!Number.isFinite(percentage)) return null;
+            const ranges = loadKickRanges();
+            for (const range of ranges) {
+                if (percentage >= range.min && percentage <= range.max) {
+                    return range.color;
+                }
+            }
+            return null;
+        }
+
+        function displayReleaseGroupSummary(version, summary, showFixVersions = false, showJql = false, calculateKickBackRatio = false, calculateTimeAnalysis = false, includeStatusGroup = false, includeStatusDetail = false, includeTotalTimeColumns = false, includeAverageColumns = false) {
+            const resultsSection = document.getElementById('resultsSection');
+            const resultsDiv = document.getElementById('releaseResults');
+            
+            if (summary.length === 0) {
+                resultsDiv.innerHTML = '<p class="no-results">No data found for the selected release groups.</p>';
+                resultsSection.hidden = false;
+                return;
+            }
+
+            // Get status groups for column headers
+            const statusGroups = calculateTimeAnalysis ? getTimeStatusGroups() : [];
+
+            // Build summary table
+            const rowsHtml = summary.map(stats => {
+                const throughputIssuesStyle = stats.projectGroupTeamMembers ? ('background-color: ' + (getCountRangeColor(stats.total.count / stats.projectGroupTeamMembers) || 'transparent') + ';') : '';
+                const throughputSpStyle = stats.projectGroupTeamMembers ? ('background-color: ' + (getSpRangeColor(stats.total.storyPoints / stats.projectGroupTeamMembers) || 'transparent') + ';') : '';
+                const kickBackCountCell = calculateKickBackRatio ? (`<td>${Number.isFinite(stats.kickBack?.count) ? stats.kickBack.count : 'N/A'}</td>`) : '';
+                const kickBackRatioCell = calculateKickBackRatio ? (`<td style="${Number.isFinite(stats.kickBack?.ratio) ? ('background-color: ' + (getKickRangeColor(Math.round(stats.kickBack.ratio * 100)) || 'transparent') + '; text-align: center;') : ''}">${Number.isFinite(stats.kickBack?.ratio) ? (Math.round(stats.kickBack.ratio * 100) + '%') : 'N/A'}</td>`) : '';
+                
+                // Add cells for each status group followed by its individual statuses
+                let statusCells = '';
+                let averageCells = '';
+                if (calculateTimeAnalysis) {
+                    statusGroups.forEach(group => {
+                        // Add status group cell (only if includeStatusGroup is true)
+                        if (includeStatusGroup) {
+                            const ms = stats.timeByStatusGroup?.[group.name] || 0;
+                            if (includeTotalTimeColumns) {
+                                statusCells += `<td style="font-size:0.85rem;">${formatDuration(ms)}</td>`;
+                            }
+                            
+                            // Add average cell for status group (if average enabled)
+                            if (includeAverageColumns) {
+                                const avgMs = stats.total.count > 0 ? ms / stats.total.count : 0;
+                                averageCells += `<td style="font-size:0.85rem;">${formatDuration(avgMs)}</td>`;
+                            }
+                        }
+                        
+                        // Add individual status cells for this group (if detail enabled)
+                        if (includeStatusDetail) {
+                            group.statuses.forEach(statusName => {
+                                // Find matching status in the data (case-insensitive)
+                                let statusMs = 0;
+                                Object.entries(stats.timeByIndividualStatus || {}).forEach(([status, duration]) => {
+                                    if (status.toLowerCase() === statusName.toLowerCase()) {
+                                        statusMs = duration;
+                                    }
+                                });
+                                if (includeTotalTimeColumns) {
+                                    statusCells += `<td style="font-size:0.85rem;">${formatDuration(statusMs)}</td>`;
+                                }
+                                
+                                // Add average cell for individual status (if average enabled)
+                                if (includeAverageColumns) {
+                                    const avgStatusMs = stats.total.count > 0 ? statusMs / stats.total.count : 0;
+                                    averageCells += `<td style="font-size:0.85rem;">${formatDuration(avgStatusMs)}</td>`;
+                                }
+                            });
+                        }
+                    });
+                }
+
+                return `
+                    <tr>
+                        <td><strong>${escapeHtml(stats.projectGroupName)}</strong></td>
+                        <td><strong>${escapeHtml(stats.groupName)}</strong></td>
+                        <td>${stats.projectGroupTeamMembers ?? 'N/A'}</td>
+                        ${showFixVersions ? `<td>${escapeHtml(stats.fixVersions.join(', '))}</td>` : ''}
+                        ${showJql ? `<td style="font-family: monospace; font-size: 0.85rem; word-break: break-all;">${escapeHtml(stats.jql)}</td>` : ''}
+                        <td>${stats.Story.count}</td>
+                        <td>${stats.Spike.count}</td>
+                        <td>${stats.Bug.count}</td>
+                        <td><strong>${stats.total.count}</strong></td>
+                        <td style="${throughputIssuesStyle}">${stats.projectGroupTeamMembers ? (stats.total.count / stats.projectGroupTeamMembers).toFixed(2) : 'N/A'}</td>
+                        <td>${stats.Story.storyPoints.toFixed(1)}</td>
+                        <td>${stats.Spike.storyPoints.toFixed(1)}</td>
+                        <td>${stats.Bug.storyPoints.toFixed(1)}</td>
+                        <td><strong>${stats.total.storyPoints.toFixed(1)}</strong></td>
+                        <td style="${throughputSpStyle}">${stats.projectGroupTeamMembers ? (stats.total.storyPoints / stats.projectGroupTeamMembers).toFixed(2) : 'N/A'}</td>
+                        ${kickBackCountCell}
+                        ${kickBackRatioCell}
+                        ${statusCells}
+                        ${averageCells}
+                    </tr>`;
+            }).join('');
+
+            // Build status group and individual status headers
+            let statusHeaders = '';
+            let averageHeaders = '';
+            if (calculateTimeAnalysis) {
+                statusGroups.forEach(group => {
+                    // Add status group header (highlighted) - only if includeStatusGroup is true
+                    if (includeStatusGroup) {
+                        if (includeTotalTimeColumns) {
+                            statusHeaders += `<th style="background-color: #667eea; color: white; font-weight: bold;">Time in ${escapeHtml(group.name)}</th>`;
+                        }
+                        
+                        // Add average header for status group (if average enabled)
+                        if (includeAverageColumns) {
+                            averageHeaders += `<th style="background-color: #8b9cf6; color: white; font-weight: bold;">Average Time in ${escapeHtml(group.name)}</th>`;
+                        }
+                    }
+                    
+                    // Add individual status headers for this group (if detail enabled)
+                    if (includeStatusDetail) {
+                        group.statuses.forEach(status => {
+                            if (includeTotalTimeColumns) {
+                                statusHeaders += `<th style="font-size:0.9rem; background-color: #bfdbfe; color: #1e3a8a; font-weight: 600;">Time in ${escapeHtml(status)}</th>`;
+                            }
+                            
+                            // Add average header for individual status (if average enabled)
+                            if (includeAverageColumns) {
+                                averageHeaders += `<th style="font-size:0.9rem; background-color: #dbeafe; color: #1e3a8a; font-weight: 600;">Average Time in ${escapeHtml(status)}</th>`;
+                            }
+                        });
+                    }
+                });
+            }
+
+            let html = `
+                <div class="release-summary">
+                    <h3>${escapeHtml(version || 'Release Analysis')}</h3>
+                    <p><strong>Number of Results:</strong> ${summary.length} (project group × release group combinations)</p>
+                </div>
+
+                <div class="issues-table" style="overflow-x:auto; width:100%;">
+                    <h4>Release Group Analysis</h4>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Project Group</th>
+                                <th>Release Group</th>
+                                <th style="background-color: #f3f4f6; color: #374151; font-weight: 700;">Team Members</th>
+                                ${showFixVersions ? '<th>Fix Versions</th>' : ''}
+                                ${showJql ? '<th>JQL Query</th>' : ''}
+                                <th style="background-color: #fde68a; color: #92400e; font-weight: 700;">Story Count</th>
+                                <th style="background-color: #fde68a; color: #92400e; font-weight: 700;">Spike Count</th>
+                                <th style="background-color: #fde68a; color: #92400e; font-weight: 700;">Bug Count</th>
+                                <th style="background-color: #fde68a; color: #92400e; font-weight: 700;">Total Count</th>
+                                <th style="background-color: #fde68a; color: #92400e; font-weight: 700;">Throughput - Issues</th>
+                                <th>Story Points</th>
+                                <th>Spike Points</th>
+                                <th>Bug Points</th>
+                                <th>Total Points</th>
+                                <th>Throughput - SP</th>
+                                ${calculateKickBackRatio ? '<th style="background-color: #fde68a; color: #92400e; font-weight: 700;">Reopened Count</th>' : ''}
+                                ${calculateKickBackRatio ? '<th style="background-color: #fed7aa; color: #9a3412; font-weight: 700;">Kick Back Ratio</th>' : ''}
+                                ${statusHeaders}
+                                ${averageHeaders}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rowsHtml}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            resultsDiv.innerHTML = html;
+            resultsSection.hidden = false;
+        }
+
+        function hexToArgb(hexColor) {
+            // Convert #RRGGBB to FFRRGGBB (ARGB with full opacity)
+            if (!hexColor) return null;
+            const hex = hexColor.replace('#', '').toUpperCase();
+            if (hex.length !== 6) return null;
+            return 'FF' + hex;
+        }
+
+        // -- Time analysis helpers (copied from time-analyzer.js) --
+        function formatDuration(ms) {
+            if (!ms || ms <= 0) return '0s';
+            const totalSec = Math.floor(ms / 1000);
+            const days = Math.floor(totalSec / 86400);
+            let rem = totalSec % 86400;
+            const hours = Math.floor(rem / 3600);
+            rem = rem % 3600;
+            const minutes = Math.floor(rem / 60);
+            const seconds = rem % 60;
+            const parts = [];
+            if (days) parts.push(`${days}d`);
+            if (hours) parts.push(`${hours}h`);
+            if (minutes) parts.push(`${minutes}m`);
+            if (seconds && parts.length === 0) parts.push(`${seconds}s`);
+            return parts.join(' ') || '0s';
+        }
+
+        function computeStatusDurations(issue) {
+            const histories = (issue.changelog?.histories || []).slice().sort((a, b) => new Date(a.created) - new Date(b.created));
+            const createdAt = new Date(issue.fields?.created || Date.now());
+            let currentTime = createdAt;
+            const firstStatusItem = histories.find(h => h.items.some(it => it.field === 'status'))?.items.find(it => it.field === 'status');
+            let currentStatus = firstStatusItem?.fromString || firstStatusItem?.toString || (issue.fields?.status?.name) || 'Unknown';
+            const periods = [];
+            for (const h of histories) {
+                const changeTime = new Date(h.created);
+                for (const it of h.items) {
+                    if (it.field === 'status') {
+                        periods.push({ status: currentStatus, from: currentTime, to: changeTime });
+                        currentStatus = it.toString || it.to || currentStatus;
+                        currentTime = changeTime;
+                    }
+                }
+            }
+            const lastTime = new Date(issue.fields?.updated || Date.now());
+            periods.push({ status: currentStatus, from: currentTime, to: lastTime });
+            const totals = {};
+            periods.forEach(p => {
+                const ms = Math.max(0, new Date(p.to) - new Date(p.from));
+                totals[p.status] = (totals[p.status] || 0) + ms;
+            });
+            return Object.entries(totals).map(([status, durationMs]) => ({ status, durationMs })).sort((a, b) => b.durationMs - a.durationMs);
+        }
+
+        function exportToExcel() {
+            if (!lastAnalysisData || !lastAnalysisData.summary || lastAnalysisData.summary.length === 0) {
+                showMessage('No data to export. Please run an analysis first.', 'error');
+                return;
+            }
+
+            try {
+                const { version, selectedProjectGroups, groupNames, summary, showFixVersions, showJql, filterDoneStatus, calculateKickBackRatio } = lastAnalysisData;
+
+                // Prepare data array
+                const data = [];
+                
+                // Add header info
+                data.push(['Release Delivery Analysis']);
+                data.push(['Analysis Label:', version || 'N/A']);
+                data.push(['Project Groups:', selectedProjectGroups ? selectedProjectGroups.join(', ') : 'N/A']);
+                data.push(['Release Groups:', groupNames.join(', ')]);
+                data.push(['Filter Done Status:', filterDoneStatus ? 'Yes' : 'No']);
+                data.push(['Generated:', new Date().toLocaleString()]);
+                data.push([]); // Empty row
+
+                // Get status groups for Excel export
+                const statusGroups = lastAnalysisData.calculateTimeAnalysis ? getTimeStatusGroups() : [];
+
+                // Add table headers
+                const headers = ['Project Group', 'Release Group', 'Team Members'];
+                if (showFixVersions) headers.push('Fix Versions');
+                if (showJql) headers.push('JQL Query');
+                headers.push('Story Count', 'Spike Count', 'Bug Count', 'Total Count', 'Throughput - Issues',
+                           'Story Points', 'Spike Points', 'Bug Points', 'Total Points');
+                headers.push('Throughput - SP');
+                if (calculateKickBackRatio) headers.push('Reopened Count', 'Kick Back Ratio');
+                if (lastAnalysisData.calculateTimeAnalysis) { 
+                    const averageHeaders = [];
+                    statusGroups.forEach(group => {
+                        // Add status group headers (only if includeStatusGroup is true)
+                        if (lastAnalysisData.includeStatusGroup) {
+                            if (lastAnalysisData.includeTotalTimeColumns) {
+                                headers.push('Time in ' + group.name);
+                            }
+                            if (lastAnalysisData.includeAverageColumns) {
+                                averageHeaders.push('Average Time in ' + group.name);
+                            }
+                        }
+                        if (lastAnalysisData.includeStatusDetail) {
+                            group.statuses.forEach(status => {
+                                if (lastAnalysisData.includeTotalTimeColumns) {
+                                    headers.push('Time in ' + status);
+                                }
+                                if (lastAnalysisData.includeAverageColumns) {
+                                    averageHeaders.push('Average Time in ' + status);
+                                }
+                            });
+                        }
+                    });
+                    headers.push(...averageHeaders);
+                }
+                data.push(headers);
+
+                // Add data rows
+                summary.forEach(stats => {
+                    const row = [stats.projectGroupName, stats.groupName, stats.projectGroupTeamMembers ?? 'N/A'];
+                    if (showFixVersions) row.push(stats.fixVersions.join(', '));
+                    if (showJql) row.push(stats.jql);
+                    
+                    row.push(
+                        stats.Story.count,
+                        stats.Spike.count,
+                        stats.Bug.count,
+                        stats.total.count,
+                        stats.projectGroupTeamMembers ? parseFloat((stats.total.count / stats.projectGroupTeamMembers).toFixed(2)) : 'N/A',
+                        parseFloat(stats.Story.storyPoints.toFixed(1)),
+                        parseFloat(stats.Spike.storyPoints.toFixed(1)),
+                        parseFloat(stats.Bug.storyPoints.toFixed(1)),
+                        parseFloat(stats.total.storyPoints.toFixed(1))
+                    );
+                    row.push(
+                        stats.projectGroupTeamMembers ? parseFloat((stats.total.storyPoints / stats.projectGroupTeamMembers).toFixed(2)) : 'N/A'
+                    );
+                    if (calculateKickBackRatio) {
+                        row.push(Number.isFinite(stats.kickBack?.count) ? stats.kickBack.count : 'N/A');
+                        row.push(Number.isFinite(stats.kickBack?.ratio) ? `${Math.round(stats.kickBack.ratio * 100)}%` : 'N/A');
+                    }
+                    if (lastAnalysisData.calculateTimeAnalysis) {
+                        const averageRow = [];
+                        statusGroups.forEach(group => {
+                            // Add status group value (only if includeStatusGroup is true)
+                            if (lastAnalysisData.includeStatusGroup) {
+                                const ms = stats.timeByStatusGroup?.[group.name] || 0;
+                                if (lastAnalysisData.includeTotalTimeColumns) {
+                                    row.push(formatDuration(ms));
+                                }
+                                
+                                // Add average value for status group (if average enabled)
+                                if (lastAnalysisData.includeAverageColumns) {
+                                    const avgMs = stats.total.count > 0 ? ms / stats.total.count : 0;
+                                    averageRow.push(formatDuration(avgMs));
+                                }
+                            }
+                            
+                            // Add individual status values for this group (if detail enabled)
+                            if (lastAnalysisData.includeStatusDetail) {
+                                group.statuses.forEach(statusName => {
+                                    // Find matching status in the data (case-insensitive)
+                                    let statusMs = 0;
+                                    Object.entries(stats.timeByIndividualStatus || {}).forEach(([status, duration]) => {
+                                        if (status.toLowerCase() === statusName.toLowerCase()) {
+                                            statusMs = duration;
+                                        }
+                                    });
+                                    if (lastAnalysisData.includeTotalTimeColumns) {
+                                        row.push(formatDuration(statusMs));
+                                    }
+                                    
+                                    // Add average value for individual status (if average enabled)
+                                    if (lastAnalysisData.includeAverageColumns) {
+                                        const avgStatusMs = stats.total.count > 0 ? statusMs / stats.total.count : 0;
+                                        averageRow.push(formatDuration(avgStatusMs));
+                                    }
+                                });
+                            }
+                        });
+                        row.push(...averageRow);
+                    }
+                    data.push(row);
+                });
+
+                // Create workbook and worksheet
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.aoa_to_sheet(data);
+
+                // Style header row for time/average columns in Excel
+                if (lastAnalysisData.calculateTimeAnalysis) {
+                    const headerRowIndex = 7; // 0-based row index for column headers
+                    const groupNameSet = new Set(statusGroups.map(group => group.name));
+                    const statusNameSet = new Set();
+                    statusGroups.forEach(group => {
+                        group.statuses.forEach(status => statusNameSet.add(status));
+                    });
+
+                    headers.forEach((header, colIdx) => {
+                        if (typeof header !== 'string') return;
+                        const isTime = header.startsWith('Time in ');
+                        const isAverage = header.startsWith('Average Time in ');
+                        const isCount = header.endsWith(' Count');
+                        const isKickBackRatio = header === 'Kick Back Ratio';
+                        const isTeamMembers = header === 'Team Members';
+                        const isThroughputIssues = header === 'Throughput - Issues';
+                        if (!isTime && !isAverage && !isCount && !isKickBackRatio && !isTeamMembers && !isThroughputIssues) return;
+
+                        const label = header.replace(/^Average Time in |^Time in /, '');
+                        const isGroup = groupNameSet.has(label);
+                        const isStatus = statusNameSet.has(label);
+
+                        let fillColor = null;
+                        let fontColor = null;
+
+                        if (isThroughputIssues) {
+                            fillColor = 'FDE68A';
+                            fontColor = '92400E';
+                        } else if (isTeamMembers) {
+                            fillColor = 'BFDBFE';
+                            fontColor = '1E3A8A';
+                        } else if (isKickBackRatio) {
+                            fillColor = 'FED7AA';
+                            fontColor = '9A3412';
+                        } else if (isCount) {
+                            fillColor = 'FDE68A';
+                            fontColor = '92400E';
+                        } else if (isGroup) {
+                            if (isTime) {
+                                fillColor = '667EEA';
+                                fontColor = 'FFFFFF';
+                            } else if (isAverage) {
+                                fillColor = '8B9CF6';
+                                fontColor = 'FFFFFF';
+                            }
+                        } else if (isStatus) {
+                            if (isTime) {
+                                fillColor = 'BFDBFE';
+                                fontColor = '1E3A8A';
+                            } else if (isAverage) {
+                                fillColor = 'DBEAFE';
+                                fontColor = '1E3A8A';
+                            }
+                        }
+
+                        if (fillColor) {
+                            const cellRef = XLSX.utils.encode_cell({ r: headerRowIndex, c: colIdx });
+                            if (ws[cellRef]) {
+                                ws[cellRef].s = {
+                                    fill: {
+                                        patternType: 'solid',
+                                        fgColor: { rgb: fillColor }
+                                    },
+                                    font: {
+                                        color: { rgb: fontColor },
+                                        bold: true
+                                    }
+                                };
+                            }
+                        }
+                    });
+                }
+
+                // Apply cell background colors to Throughput columns
+                let throughputIssuesColIdx = 3; // After Project Group, Release Group, and Team Members
+                if (showFixVersions) throughputIssuesColIdx++;
+                if (showJql) throughputIssuesColIdx++;
+                throughputIssuesColIdx += 4; // 4 Count columns, then comes Throughput - Issues
+                const throughputSpColIdx = throughputIssuesColIdx + 5; // Throughput - Issues + 4 Points columns
+                let kickRatioColIdx = throughputSpColIdx + 1;
+                if (calculateKickBackRatio) kickRatioColIdx += 1; // Skip Reopened Count column
+
+                // Starting row for data (after header info and column headers)
+                let dataRowIdx = 8; // 0-indexed (row 9 in Excel)
+                
+                summary.forEach((stats, idx) => {
+                    // Get colors for this row's throughput values
+                    const throughputIssuesValue = stats.projectGroupTeamMembers ? stats.total.count / stats.projectGroupTeamMembers : null;
+                    const throughputSpValue = stats.projectGroupTeamMembers ? stats.total.storyPoints / stats.projectGroupTeamMembers : null;
+                    const kickRatioPercentage = Number.isFinite(stats.kickBack?.ratio) ? Math.round(stats.kickBack.ratio * 100) : null;
+                    
+                    const countColor = throughputIssuesValue !== null ? getCountRangeColor(throughputIssuesValue) : null;
+                    const spColor = throughputSpValue !== null ? getSpRangeColor(throughputSpValue) : null;
+                    const kickColor = calculateKickBackRatio && kickRatioPercentage !== null ? getKickRangeColor(kickRatioPercentage) : null;
+
+                    // Apply color to Throughput - Issues cell
+                    if (countColor) {
+                        const cellRef = XLSX.utils.encode_cell({ r: dataRowIdx + idx, c: throughputIssuesColIdx });
+                        if (ws[cellRef]) {
+                            ws[cellRef].s = {
+                                fill: {
+                                    patternType: 'solid',
+                                    fgColor: { rgb: countColor.replace('#', '') }
+                                }
+                            };
+                        }
+                    }
+
+                    // Apply color to Throughput - SP cell
+                    if (spColor) {
+                        const cellRef = XLSX.utils.encode_cell({ r: dataRowIdx + idx, c: throughputSpColIdx });
+                        if (ws[cellRef]) {
+                            ws[cellRef].s = {
+                                fill: {
+                                    patternType: 'solid',
+                                    fgColor: { rgb: spColor.replace('#', '') }
+                                }
+                            };
+                        }
+                    }
+
+                    // Apply color to Kick Back Ratio cell
+                    if (calculateKickBackRatio && kickColor) {
+                        const cellRef = XLSX.utils.encode_cell({ r: dataRowIdx + idx, c: kickRatioColIdx });
+                        if (ws[cellRef]) {
+                            ws[cellRef].s = {
+                                fill: {
+                                    patternType: 'solid',
+                                    fgColor: { rgb: kickColor.replace('#', '') }
+                                }
+                            };
+                        }
+                    }
+                });
+
+                // Set column widths
+                const colWidths = [
+                    { wch: 15 }, // Project Group
+                    { wch: 30 }, // Release Group
+                ];
+                if (showFixVersions) colWidths.push({ wch: 40 });
+                if (showJql) colWidths.push({ wch: 60 });
+                colWidths.push(
+                    { wch: 12 }, { wch: 13 }, { wch: 12 }, { wch: 13 },
+                    { wch: 11 }, { wch: 12 }, { wch: 12 }, { wch: 13 }
+                );
+                colWidths.push(
+                    { wch: 14 }, { wch: 18 }, { wch: 18 }
+                );
+                if (calculateKickBackRatio) colWidths.push({ wch: 14 }, { wch: 16 });
+                // Add widths for time/average columns when enabled
+                if (lastAnalysisData.calculateTimeAnalysis) {
+                    const timeColWidth = 20;
+                    const averageColWidth = 22;
+                    const timeCols = [];
+                    const averageCols = [];
+
+                    statusGroups.forEach(group => {
+                        if (lastAnalysisData.includeStatusGroup) {
+                            if (lastAnalysisData.includeTotalTimeColumns) timeCols.push({ wch: timeColWidth });
+                            if (lastAnalysisData.includeAverageColumns) averageCols.push({ wch: averageColWidth });
+                        }
+                        if (lastAnalysisData.includeStatusDetail) {
+                            group.statuses.forEach(() => {
+                                if (lastAnalysisData.includeTotalTimeColumns) timeCols.push({ wch: timeColWidth });
+                                if (lastAnalysisData.includeAverageColumns) averageCols.push({ wch: averageColWidth });
+                            });
+                        }
+                    });
+
+                    colWidths.push(...timeCols, ...averageCols);
+                }
+                ws['!cols'] = colWidths;
+
+                // Add worksheet to workbook
+                XLSX.utils.book_append_sheet(wb, ws, 'Release Analysis');
+
+                // Generate filename and download
+                const timestamp = new Date().toISOString().slice(0, 10);
+                const filename = `Release_Delivery_${selectedProjectGroups.join('_')}_${timestamp}.xlsx`;
+                XLSX.writeFile(wb, filename);
+            } catch (error) {
+                console.error('Error exporting to Excel:', error);
+                showMessage(`Error exporting to Excel: ${error.message}`, 'error');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Close Ticket Analyzer</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header class="app-header">
+            <div class="header-content">
+                <div class="header-text">
+                    <h1>✅ Close Ticket Analyzer</h1>
+                    <div id="userInfo" class="user-info" hidden style="margin-top: 1rem; display: flex; align-items: center; gap: 1rem; justify-content: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1rem 2rem; border-radius: 12px; border: 2px solid rgba(255, 255, 255, 0.3); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);">
+                        <span style="font-weight: 700; color: #fff; font-size: 1rem;">You are connected to JIRA as:</span>
+                        <div class="user-avatar">
+                            <img id="userAvatar" src="" alt="User avatar" />
+                            <span id="userInitials" class="user-initials"></span>
+                        </div>
+                        <div class="user-details">
+                            <span id="userName" class="user-name"></span>
+                            <span id="userEmail" class="user-email"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <a href="index.html" class="btn btn-secondary">Back to JIRA Tool</a>
+                    <a href="status-analyzer-setup.html" class="btn btn-secondary">Setup</a>
+                    <a href="status-analyzer-config.html" class="btn btn-secondary">Configuration</a>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <!-- Input Section -->
+            <section class="input-section card">
+                <h2>Analyze Close Ticket Changelog</h2>
+                <form id="analyzerForm" class="analyzer-form">
+                    <div class="form-group">
+                        <label for="reportTitle">Report Title</label>
+                        <input 
+                            type="text" 
+                            id="reportTitle" 
+                            name="reportTitle" 
+                            placeholder="Enter a title for your analysis report"
+                            class="form-control"
+                        >
+                        <small>Optional: Add a custom title for this analysis report.</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="jqlQuery">JQL Query (Optional)</label>
+                        <textarea
+                            id="jqlQuery"
+                            name="jqlQuery"
+                            placeholder="project = PROJ AND status != Done ORDER BY updated DESC"
+                            rows="3"
+                            class="form-control"
+                        ></textarea>
+                        <small>Use JQL to filter issues before selecting a ticket</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Timeframe (Optional)</label>
+                        <div class="date-range-inputs">
+                            <div class="date-input-wrapper">
+                                <label for="startDate" class="small-label">From</label>
+                                <input 
+                                    type="datetime-local" 
+                                    id="startDate" 
+                                    name="startDate" 
+                                    required
+                                    class="form-control"
+                                >
+                            </div>
+                            <div class="date-input-wrapper">
+                                <label for="endDate" class="small-label">To</label>
+                                <input 
+                                    type="datetime-local" 
+                                    id="endDate" 
+                                    name="endDate" 
+                                    class="form-control"
+                                >
+                            </div>
+                        </div>
+                        <small>From is required for Close Ticket Analyzer.</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="combinedJqlPreview">Combined JQL Preview</label>
+                        <textarea
+                            id="combinedJqlPreview"
+                            name="combinedJqlPreview"
+                            rows="3"
+                            class="form-control"
+                            readonly
+                        ></textarea>
+                        <small>Shows the JQL Query combined with: AND 'Status Changed' &gt; "From". Both summary tables are generated from changelog transition timestamps only.</small>
+                    </div>
+
+                    <div class="changelog-column-toggle">
+                        <label>
+                            <input type="checkbox" id="includeMovedToRFSO" checked>
+                            Include Moved to RFSO
+                        </label>
+                    </div>
+                    <div class="changelog-column-toggle">
+                        <label>
+                            <input type="checkbox" id="includeMovedToProduction" checked>
+                            Include Moved to Ready for Production
+                        </label>
+                    </div>
+                    <div class="changelog-column-toggle">
+                        <label>
+                            <input type="checkbox" id="includeTotalsCombinedSummary" checked>
+                            Include Totals in Combined Production + RFSO Summary
+                        </label>
+                    </div>
+
+                    <button type="submit" id="analyzeBtn" class="btn btn-primary">🔍 Analyze Tickets</button>
+                    <div id="analyzeLoadingMessage" class="loading-message" hidden>🔍 Loading tickets from JIRA and analyzing them...</div>
+                </form>
+                <div id="statusMessage" class="status-message" hidden></div>
+            </section>
+
+            <!-- Issue List Section -->
+            <section id="issueListSection" class="ticket-info-section card" hidden>
+                <div class="section-header">
+                    <h2>Close Ticket Workflow Analysis</h2>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <button id="exportBtn" class="btn btn-secondary btn-small">📥 Export to Excel</button>
+                    </div>
+                </div>
+                <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: var(--success-color);">📄 Report Title</h3>
+                <div class="summary-table-container">
+                    <table id="reportTitleTable" class="summary-table">
+                        <tbody>
+                            <tr>
+                                <th style="width: 220px;">Title</th>
+                                <td id="reportTitleResultValue"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div style="height: 2rem;"></div>
+                <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: var(--success-color);">� Status Report Timeline</h3>
+                <div class="summary-table-container">
+                    <table id="timelineTable" class="summary-table summary-table-auto">
+                        <thead>
+                            <tr>
+                                <th>Timezone</th>
+                                <th>Earliest DateTime</th>
+                                <th>Latest DateTime</th>
+                            </tr>
+                        </thead>
+                        <tbody id="timelineBody"></tbody>
+                    </table>
+                </div>
+                <div style="height: 2rem;"></div>
+                <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: var(--success-color);">📊 JQL Execution Summary</h3>
+                <div class="summary-table-container">
+                    <table id="jqlExecutionSummaryTable" class="summary-table">
+                        <tbody>
+                            <tr>
+                                <th style="width: 220px;">JQL Query Executed</th>
+                                <td id="jqlExecutedQueryValue"></td>
+                            </tr>
+                            <tr>
+                                <th>Total Tickets Retrieved</th>
+                                <td id="issueCount"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div style="height: 2rem;"></div>
+                <div id="movedToRFSOSummarySection" hidden>
+                    <div style="height: 2rem;"></div>
+                    <h3 class="collapsible-header" data-target="rfsoSummaryContent" style="margin-top: 2rem; margin-bottom: 1rem; color: var(--success-color);">
+                        <span class="collapse-icon">▼</span>
+                        📊 Moved to Ready For SignOff (RFSO) Summary
+                    </h3>
+                    <div id="rfsoSummaryContent" class="collapsible-content">
+                        <div class="summary-table-container">
+                            <table id="movedToRFSOSummaryTable" class="summary-table summary-table-detailed" style="width: max-content; min-width: 100%;">
+                                <thead id="movedToRFSOSummaryHead"></thead>
+                                <tbody id="movedToRFSOSummaryBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div id="productionSummarySection">
+                    <h3 class="collapsible-header" data-target="productionSummaryContent" style="margin-top: 2rem; margin-bottom: 1rem; color: var(--success-color);">
+                        <span class="collapse-icon">▼</span>
+                        📊 Moved to Ready for Production Summary
+                    </h3>
+                    <div id="productionSummaryContent" class="collapsible-content">
+                        <div class="summary-table-container">
+                            <table id="projectTeamDateSummaryTable" class="summary-table summary-table-detailed" style="width: max-content; min-width: 100%;">
+                                <thead id="projectTeamDateSummaryHead"></thead>
+                                <tbody id="projectTeamDateSummaryBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div id="combinedSummarySection" hidden>
+                    <div style="height: 2rem;"></div>
+                    <h3 class="collapsible-header" data-target="combinedSummaryContent" style="margin-top: 2rem; margin-bottom: 1rem; color: var(--success-color);">
+                        <span class="collapse-icon">▼</span>
+                        📊 Combined Production + RFSO Summary
+                    </h3>
+                    <div id="combinedSummaryContent" class="collapsible-content">
+                        <div class="summary-table-container">
+                            <table id="combinedSummaryTable" class="summary-table summary-table-detailed" style="width: max-content; min-width: 100%;">
+                                <thead id="combinedSummaryHead"></thead>
+                                <tbody id="combinedSummaryBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div style="height: 2rem;"></div>
+                <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: var(--success-color);">📋 Issues</h3>
+                <div id="closeTicketIssuesHint" style="margin-bottom: 0.75rem; color: #666; font-weight: 500;">Select a row or cell in the summary table to view matching tickets.</div>
+                <div id="closeTicketIssuesContainer" hidden>
+                    <div class="summary-table-container">
+                        <table id="issueKeyTable" class="summary-table summary-table-detailed">
+                            <thead>
+                                <tr>
+                                    <th class="sortable" data-sort-key="key">Issue Key <span class="sort-arrow"></span></th>
+                                    <th class="sortable" data-sort-key="project">Project <span class="sort-arrow"></span></th>
+                                    <th class="sortable" data-sort-key="team">Team <span class="sort-arrow"></span></th>
+                                    <th class="sortable" data-sort-key="platform">Platform <span class="sort-arrow"></span></th>
+                                    <th class="sortable" data-sort-key="status">Status <span class="sort-arrow"></span></th>
+                                    <th class="sortable" data-sort-key="changelogStatusTimestamp">RFSO Status Changed (Changelog)</th>
+                                    <th class="sortable" data-sort-key="doneChangelogStatusTimestamp">DONE Status Changed (Changelog)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="issueKeyList"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Ticket Info Section -->
+            <section id="ticketInfoSection" class="ticket-info-section card" hidden>
+                <h2>Ticket Information</h2>
+                <div class="ticket-details">
+                    <div class="detail-item">
+                        <span class="detail-label">Key:</span>
+                        <span id="ticketKeyDisplay" class="detail-value"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Summary:</span>
+                        <span id="ticketSummary" class="detail-value"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Status:</span>
+                        <span id="ticketStatus" class="detail-value"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Assignee:</span>
+                        <span id="ticketAssignee" class="detail-value"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Total Changes:</span>
+                        <span id="changeCount" class="detail-value"></span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- AI Analysis Section -->
+            <section id="aiAnalysisSection" class="ai-analysis-section card" hidden>
+                <div class="section-header">
+                    <h2>🤖 AI Analysis</h2>
+                    <div class="section-actions">
+                        <button id="exportBtn" class="btn btn-secondary btn-small">📥 Export</button>
+                        <button id="refreshAnalysisBtn" class="btn btn-secondary btn-small">🔄 Re-analyze</button>
+                    </div>
+                </div>
+                <div id="aiAnalysisContent" class="analysis-content"></div>
+            </section>
+
+            <!-- Raw Changelog Section -->
+            <section id="changelogSection" class="changelog-section card" hidden>
+                <div class="section-header">
+                    <h2>Changelog History</h2>
+                    <button id="toggleChangelogBtn" class="btn btn-secondary btn-small">
+                        ▼ Show Details
+                    </button>
+                </div>
+                <div id="changelogContent" class="changelog-content" hidden>
+                    <div class="changelog-controls">
+                        <input 
+                            type="text" 
+                            id="changelogSearch" 
+                            placeholder="Filter by field or value..." 
+                            class="form-control"
+                        >
+                    </div>
+                    <div class="table-container">
+                        <table id="changelogTable" class="changelog-table">
+                            <thead>
+                                <tr>
+                                    <th class="sortable" data-sort="date">Date <span class="sort-arrow"></span></th>
+                                    <th class="sortable" data-sort="author">Author <span class="sort-arrow"></span></th>
+                                    <th class="sortable" data-sort="field">Field <span class="sort-arrow"></span></th>
+                                    <th>From</th>
+                                    <th>To</th>
+                                </tr>
+                            </thead>
+                            <tbody id="changelogTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="app-footer">
+            <p>Close Ticket Analyzer - Powered by AI</p>
+        </footer>
+    </div>
+
+    <script src="close-ticket-analyzer.js?v=1"></script>
+</body>
+</html>

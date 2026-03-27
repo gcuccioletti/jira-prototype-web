@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Jira Integration Tool - Setup Configuration">
+    <title>Setup - Jira Integration Tool</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="header-text">
+                    <h1>⚙️ Setup & Configuration</h1>
+                    <p class="subtitle">Configure your Jira connection and preferences</p>
+                    <div id="userInfo" class="user-info" hidden style="margin-top: 1rem; display: flex; align-items: center; gap: 1rem; justify-content: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1rem 2rem; border-radius: 12px; border: 2px solid rgba(255, 255, 255, 0.3); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);">
+                        <span style="font-weight: 700; color: #fff; font-size: 1rem;">You are connected to JIRA as:</span>
+                        <div class="user-avatar">
+                            <img id="userAvatar" src="" alt="User avatar" />
+                            <span id="userInitials" class="user-initials"></span>
+                        </div>
+                        <div class="user-details">
+                            <span id="userName" class="user-name"></span>
+                            <span id="userEmail" class="user-email"></span>
+                        </div>
+                    </div>
+                </div>
+                <button id="backBtn" class="btn btn-setup" aria-label="Back to main page">
+                    ← Back
+                </button>
+            </div>
+        </header>
+
+        <main>
+            <!-- Server Configuration Section -->
+            <section class="setup-section">
+                <h2>🔌 Server Configuration</h2>
+                <p class="section-description">Configure your Jira server connection details</p>
+                
+                <form id="serverConfigForm" class="form">
+                    <div class="form-group">
+                        <label for="jiraUrl">Jira Server URL <span class="required">*</span></label>
+                        <input
+                            type="url"
+                            id="jiraUrl"
+                            name="jiraUrl"
+                            placeholder="https://your-domain.atlassian.net"
+                            required
+                        >
+                        <small>Your Jira instance URL (without trailing slash)</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="proxyUrl">Proxy Server URL</label>
+                        <input
+                            type="url"
+                            id="proxyUrl"
+                            name="proxyUrl"
+                            placeholder="http://localhost:3000/api/jira"
+                            value="http://localhost:3000/api/jira"
+                        >
+                        <small>Local proxy server endpoint for API requests</small>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="submit" class="btn btn-primary">Save Server Config</button>
+                        <button type="button" id="testConnectionBtn" class="btn btn-secondary">Test Connection</button>
+                    </div>
+                </form>
+
+                <div id="connectionTestResult" class="status-message" role="alert" aria-live="polite"></div>
+            </section>
+
+            <!-- Authentication Section -->
+            <section class="setup-section">
+                <h2>🔐 Authentication</h2>
+                <p class="section-description">Configure your authentication credentials</p>
+                
+                <form id="authConfigForm" class="form">
+                    <div class="form-group">
+                        <label for="authType">Authentication Type</label>
+                        <select id="authType" name="authType">
+                            <option value="basic">Basic Auth (Username + API Token)</option>
+                            <option value="bearer">Bearer Token</option>
+                            <option value="oauth">OAuth (Not Implemented)</option>
+                        </select>
+                    </div>
+
+                    <div id="basicAuthFields">
+                        <div class="form-group">
+                            <label for="username">Email/Username <span class="required">*</span></label>
+                            <input
+                                type="email"
+                                id="username"
+                                name="username"
+                                placeholder="your-email@domain.com"
+                            >
+                            <small>Your Jira account email</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="apiToken">API Token <span class="required">*</span></label>
+                            <input
+                                type="password"
+                                id="apiToken"
+                                name="apiToken"
+                                placeholder="Your Jira API token"
+                            >
+                            <small>Generate at: <a href="https://id.atlassian.com/manage-profile/security/api-tokens" target="_blank">Atlassian API Tokens</a></small>
+                        </div>
+                    </div>
+
+                    <div id="bearerAuthFields" style="display: none;">
+                        <div class="form-group">
+                            <label for="bearerToken">Bearer Token <span class="required">*</span></label>
+                            <input
+                                type="password"
+                                id="bearerToken"
+                                name="bearerToken"
+                                placeholder="Your bearer token"
+                            >
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Save Credentials</button>
+                </form>
+
+                <div id="authSaveResult" class="status-message" role="alert" aria-live="polite"></div>
+            </section>
+
+            <!-- Default Query Settings Section -->
+            <section class="setup-section">
+                <h2>📝 Default Query Settings</h2>
+                <p class="section-description">Set default values for your queries</p>
+                
+                <form id="queryConfigForm" class="form">
+                    <div class="form-group">
+                        <label for="defaultProjectKey">Default Project</label>
+                        <div class="project-selector">
+                            <select id="projectDropdown" name="projectDropdown" class="project-dropdown">
+                                <option value="">-- Select a project --</option>
+                            </select>
+                            <button type="button" id="loadProjectsBtn" class="btn btn-secondary btn-small">
+                                🔄 Load Projects
+                            </button>
+                        </div>
+                        <small>Select from available JIRA projects or enter manually below</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="defaultProjectKey">Or Enter Project Key Manually</label>
+                        <input
+                            type="text"
+                            id="defaultProjectKey"
+                            name="defaultProjectKey"
+                            placeholder="e.g., PROJ"
+                            style="text-transform: uppercase;"
+                        >
+                        <small>Pre-fill project key in query form</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="defaultTeam">Default Team</label>
+                        <div class="project-selector">
+                            <select id="teamDropdown" name="teamDropdown" class="project-dropdown">
+                                <option value="">-- Select a team --</option>
+                            </select>
+                            <button type="button" id="loadTeamsBtn" class="btn btn-secondary btn-small">
+                                🔄 Load Teams
+                            </button>
+                        </div>
+                        <small>Select from available JIRA teams or enter manually below</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="defaultTeam">Or Enter Team ID Manually</label>
+                        <input
+                            type="text"
+                            id="defaultTeam"
+                            name="defaultTeam"
+                            placeholder="e.g., 123"
+                        >
+                        <small>Pre-fill team identifier</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="maxResults">Maximum Results</label>
+                        <input
+                            type="number"
+                            id="maxResults"
+                            name="maxResults"
+                            placeholder="1000"
+                            min="1"
+                            max="10000"
+                            value="1000"
+                        >
+                        <small>Maximum number of issues to fetch per query</small>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Save Query Defaults</button>
+                </form>
+
+                <div id="querySaveResult" class="status-message" role="alert" aria-live="polite"></div>
+            </section>
+
+            <!-- Preferred Projects Section -->
+            <section class="setup-section">
+                <h2>⭐ Preferred Projects</h2>
+                <p class="section-description">Select your frequently used projects for quick access</p>
+                
+                <div class="form-group">
+                    <button type="button" id="loadPreferredProjectsBtn" class="btn btn-secondary">
+                        🔄 Load Available Projects
+                    </button>
+                    <small>Load all projects from JIRA to select your preferred ones</small>
+                </div>
+
+                <div id="preferredProjectsContainer" class="preferred-projects-container" hidden>
+                    <div class="form-group">
+                        <label>Select Preferred Projects</label>
+                        <div id="preferredProjectsList" class="preferred-projects-list">
+                            <!-- Projects will be loaded here -->
+                        </div>
+                    </div>
+                    
+                    <div class="button-group">
+                        <button type="button" id="savePreferredProjectsBtn" class="btn btn-primary">Save Preferred Projects</button>
+                        <button type="button" id="clearPreferredProjectsBtn" class="btn btn-secondary">Clear Selection</button>
+                    </div>
+                </div>
+
+                <div id="preferredProjectsSaveResult" class="status-message" role="alert" aria-live="polite"></div>
+                
+                <div id="savedPreferredProjects" class="saved-preferences" hidden>
+                    <h3>Currently Saved Preferred Projects</h3>
+                    <div id="savedPreferredProjectsList" class="saved-list"></div>
+                </div>
+            </section>
+
+            <!-- Preferred Teams Section -->
+            <section class="setup-section">
+                <h2>⭐ Preferred Teams</h2>
+                <p class="section-description">Select your frequently used teams for quick access</p>
+                
+                <div class="form-group">
+                    <button type="button" id="loadPreferredTeamsBtn" class="btn btn-secondary">
+                        🔄 Load Available Teams
+                    </button>
+                    <small>Load all teams from JIRA to select your preferred ones</small>
+                </div>
+
+                <div id="preferredTeamsContainer" class="preferred-teams-container" hidden>
+                    <div class="form-group">
+                        <label>Select Preferred Teams</label>
+                        <div id="preferredTeamsList" class="preferred-teams-list">
+                            <!-- Teams will be loaded here -->
+                        </div>
+                    </div>
+                    
+                    <div class="button-group">
+                        <button type="button" id="savePreferredTeamsBtn" class="btn btn-primary">Save Preferred Teams</button>
+                        <button type="button" id="clearPreferredTeamsBtn" class="btn btn-secondary">Clear Selection</button>
+                    </div>
+                </div>
+
+                <div id="preferredTeamsSaveResult" class="status-message" role="alert" aria-live="polite"></div>
+                
+                <div id="savedPreferredTeams" class="saved-preferences" hidden>
+                    <h3>Currently Saved Preferred Teams</h3>
+                    <div id="savedPreferredTeamsList" class="saved-list"></div>
+                </div>
+            </section>
+
+            <!-- JQL Templates Section -->
+            <section class="setup-section">
+                <h2>📋 JQL Templates</h2>
+                <p class="section-description">Save custom JQL query templates for quick access</p>
+                
+                <form id="jqlTemplateForm" class="form">
+                    <div class="form-group">
+                        <label for="templateName">Template Name</label>
+                        <input
+                            type="text"
+                            id="templateName"
+                            name="templateName"
+                            placeholder="e.g., Sprint Backlog"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="templateQuery">JQL Query</label>
+                        <textarea
+                            id="templateQuery"
+                            name="templateQuery"
+                            placeholder="project = {{PROJECT}} AND cf[10114] = {{TEAM}} AND status = 'In Progress'"
+                            rows="3"
+                        ></textarea>
+                        <small>Use <code>{{PROJECT}}</code> and <code>{{TEAM}}</code> to reference default values</small>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Save Template</button>
+                </form>
+
+                <div id="templateSaveResult" class="status-message" role="alert" aria-live="polite"></div>
+
+                <div id="savedTemplates" class="saved-templates">
+                    <h3>Saved Templates</h3>
+                    <div id="templatesList" class="templates-list"></div>
+                </div>
+            </section>
+
+            <!-- Data Management Section -->
+            <section class="setup-section">
+                <h2>💾 Data Management</h2>
+                <p class="section-description">Manage your stored configuration and data</p>
+                
+                <div class="data-management">
+                    <div class="info-box">
+                        <p><strong>Current Storage:</strong></p>
+                        <ul id="storageInfo">
+                            <li>Loading...</li>
+                        </ul>
+                    </div>
+
+                    <div class="button-group">
+                        <button id="recoverConfigBtn" class="btn btn-primary">🔄 Recover from Server</button>
+                        <button id="exportConfigBtn" class="btn btn-secondary">Export Configuration</button>
+                        <button id="importConfigBtn" class="btn btn-secondary">Import Configuration</button>
+                        <button id="clearAllBtn" class="btn btn-danger">Clear All Settings</button>
+                    </div>
+                    <input type="file" id="importFileInput" accept=".json" style="display: none;">
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 Jira Integration Tool. Built with ❤️ for better project management.</p>
+        </footer>
+    </div>
+
+    <script src="setup.js"></script>
+</body>
+</html>

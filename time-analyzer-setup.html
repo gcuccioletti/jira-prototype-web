@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Setup page for Time Analyzer JIRA status selection and grouping.">
+    <title>Time Analyzer Setup</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* ...existing code from status-analyzer-setup.html styles... */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="app-header" role="banner">
+            <div class="header-content">
+                <div class="header-text">
+                    <h1>⏱️ Time Analyzer Setup</h1>
+                    <div id="userInfo" class="user-info" hidden aria-live="polite" style="margin-top: 1rem; display: flex; align-items: center; gap: 1rem; justify-content: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1rem 2rem; border-radius: 12px; border: 2px solid rgba(255, 255, 255, 0.3); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);">
+                        <span style="font-weight: 700; color: #fff; font-size: 1rem;">You are connected to JIRA as:</span>
+                        <div class="user-avatar">
+                            <img id="userAvatar" src="" alt="JIRA user avatar" />
+                            <span id="userInitials" class="user-initials"></span>
+                        </div>
+                        <div class="user-details">
+                            <span id="userName" class="user-name"></span>
+                            <span id="userEmail" class="user-email"></span>
+                        </div>
+                    </div>
+                </div>
+                <nav class="header-actions" aria-label="Main navigation">
+                    <a href="time-analyzer.html" class="btn btn-secondary" role="button">Back to Analyzer</a>
+                </nav>
+            </div>
+        </header>
+        <main class="main-content setup-container">
+            <section class="setup-section" aria-labelledby="status-setup-heading">
+                <h2 id="status-setup-heading">Select Preferred JIRA Statuses</h2>
+                <button id="loadStatusesBtn" class="btn btn-primary" style="margin-bottom:1rem;" aria-label="Load statuses from JIRA">LOAD STATUSES FROM JIRA</button>
+                <div id="messageContainer" aria-live="polite"></div>
+                <div id="selectedStatusContainer" style="margin-bottom: 1rem;"></div>
+                <div id="statusListContainer"></div>
+                <div id="statusGroupsContainer" style="margin-top:2rem;"></div>
+                <div style="display: flex; gap: 0.5rem; margin-top: 2rem; flex-wrap: wrap; padding-top: 1rem; border-top: 1px solid #e5e7eb;">
+                    <button id="exportConfigBtn" class="btn btn-secondary" aria-label="Export complete configuration to JSON">📥 Export Configuration</button>
+                    <button id="importConfigBtn" class="btn btn-secondary" aria-label="Import complete configuration from JSON">📤 Import Configuration</button>
+                    <input type="file" id="importConfigFile" accept=".json" style="display: none;" />
+                </div>
+            </section>
+        </main>
+        <footer class="app-footer" role="contentinfo">
+            <p>Time Analyzer Setup</p>
+        </footer>
+    </div>
+    <script src="time-analyzer-setup.js"></script>
+</body>
+</html>

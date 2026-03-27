@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Jira Sprint Results - Review sprint outcomes and completion metrics">
+    <title>Jira Sprint Results</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body.hide-platform .platform-column {
+            display: none;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header class="app-header">
+            <div class="header-content">
+                <div class="header-text">
+                    <h1>Jira Sprint Results</h1>
+                    <p class="subtitle">Review sprint outcomes and completion metrics</p>
+                    <div id="userInfo" class="user-info" hidden style="margin-top: 1rem; display: flex; align-items: center; gap: 1rem; justify-content: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1rem 2rem; border-radius: 12px; border: 2px solid rgba(255, 255, 255, 0.3); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);">
+                        <span style="font-weight: 700; color: #fff; font-size: 1rem;">You are connected to JIRA as:</span>
+                        <div class="user-avatar">
+                            <img id="userAvatar" src="" alt="User avatar" />
+                            <span id="userInitials" class="user-initials"></span>
+                        </div>
+                        <div class="user-details">
+                            <span id="userName" class="user-name"></span>
+                            <span id="userEmail" class="user-email"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <a href="index.html" class="btn btn-secondary">Back to JIRA Tool</a>
+                    <a href="jira_sprint_results_setup.html" class="btn btn-secondary">Setup</a>
+                    <a href="jira_sprint_results_config.html" class="btn btn-secondary">Configuration</a>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <section class="input-section card">
+                <h2>Load Sprint Results</h2>
+                <form id="sprintForm" class="analyzer-form" novalidate>
+                    <div class="form-group">
+                        <label for="sprintSetSelect">Sprint Set (Optional)</label>
+                        <select id="sprintSetSelect" class="form-control">
+                            <option value="">-- Select a saved sprint set --</option>
+                        </select>
+                        <small>Choose a saved sprint set to process multiple sprints. Sprint IDs will be populated below.</small>
+                    </div>
+
+                    <div id="sprintSelectionContainer" class="form-group" style="display: none;">
+                        <label>Select Sprints to Load</label>
+                        <div id="sprintCheckboxList" style="max-height: 300px; overflow-y: auto; border: 1px solid #ddd; padding: 1rem; border-radius: 4px; background: #f9f9f9;">
+                            <!-- Sprint checkboxes will be populated here -->
+                        </div>
+                        <button type="button" id="loadSelectedSprintsBtn" class="btn btn-secondary" style="margin-top: 0.5rem;">📋 Load Selected Sprints</button>
+                        <small>Select which sprints from this Sprint Set you want to load, then click "Load Selected Sprints" to add them to the pairs list.</small>
+                    </div>
+
+                    <div id="sprintPairsList" class="form-group">
+                        <label>Board ID and Sprint ID Pairs</label>
+                        <div style="max-height: 250px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px;">
+                            <table class="summary-table" id="sprintPairsTable" style="margin: 0; min-width: 900px;">
+                                <thead>
+                                    <tr>
+                                        <th style="text-align: center; min-width: 200px;">Sprint Set</th>
+                                        <th style="text-align: center; min-width: 320px;">Sprint Name</th>
+                                        <th style="text-align: center; min-width: 140px;">Board ID</th>
+                                        <th style="text-align: center; min-width: 140px;">Sprint ID</th>
+                                        <th style="text-align: center; width: 150px;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="sprintPairsContent">
+                                    <tr>
+                                        <td colspan="5" style="text-align: center; color: #999; padding: 1rem;">No pairs added yet.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <small>Pairs populate from Sprint Set selections.</small>
+                    </div>
+
+                    <div class="form-group" style="display: none;">
+                        <label for="boardId">Board ID (Rapid View ID)</label>
+                        <input
+                            type="text"
+                            id="boardId"
+                            name="boardId"
+                            placeholder="e.g., 123"
+                            class="form-control"
+                            required
+                        >
+                        <small>Enter the Board ID (Rapid View ID) for the sprint report API.</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sprintId">Sprint ID(s)</label>
+                        <input
+                            type="text"
+                            id="sprintId"
+                            name="sprintId"
+                            placeholder="e.g., 123 or 123,124,125"
+                            class="form-control"
+                            required
+                        >
+                        <small>Enter single sprint ID or comma-separated list. Use Sprint Set above for quick selection.</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <input
+                                type="checkbox"
+                                id="includeAbandonedRejected"
+                                name="includeAbandonedRejected"
+                                checked
+                            >
+                            Include Abandon and Rejected Status
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <input
+                                type="checkbox"
+                                id="includePlatform"
+                                name="includePlatform"
+                                checked
+                            >
+                            Include Platform
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <input
+                                type="checkbox"
+                                id="showTotalRow"
+                                name="showTotalRow"
+                                checked
+                            >
+                            Show total row
+                        </label>
+                    </div>
+
+                    <button type="submit" id="loadSprintBtn" class="btn btn-primary">
+                        Load Sprint Results
+                    </button>
+                </form>
+                <div id="statusMessage" class="status-message" hidden></div>
+            </section>
+
+            <section id="resultsSection" class="ticket-info-section card" hidden>
+                <div class="section-header">
+                    <h2>Sprint Summary</h2>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <button id="exportBtn" class="btn btn-secondary btn-small">📥 Export</button>
+                    </div>
+                </div>
+                <div id="sprintSetTitle" style="margin-top: 0.5rem; font-size: 1.1rem; color: #555; font-weight: 500;"></div>
+
+                <div id="filterSection" style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1rem;">
+                    <div id="platformFilterContainer" class="form-group" style="min-width: 200px; margin: 0; display: none;">
+                        <label for="filterPlatform">Platform</label>
+                        <select id="filterPlatform" class="form-control">
+                            <option value="">All Platforms</option>
+                        </select>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: var(--success-color);">Summary Metrics</h3>
+                <div class="summary-table-container">
+                    <table class="summary-table">
+                        <thead>
+                            <tr>
+                                <th style="text-align: center; min-width: 200px;">Sprint Set Name</th>
+                                <th style="min-width: 250px; text-align: center;">Sprint Name</th>
+                                <th style="text-align: center;">Sprint Status</th>
+                                <th style="text-align: center;" title="Original Tickets = (Completed + Not Completed + Removed + Completed in Another Sprint) - Added Tickets">Original Tickets</th>
+                                <th style="text-align: center;">Added Tickets</th>
+                                <th style="text-align: center;">Removed Tickets</th>
+                                <th style="text-align: center;">Remained Tickets</th>
+                                <th style="text-align: center;">Done Tickets</th>
+                                <th style="text-align: center;">Not Done Tickets</th>
+                                <th style="text-align: center;">Percentage Complete</th>
+                                <th style="text-align: center;">Total Story Points</th>
+                                <th style="text-align: center;">Done Story Points</th>
+                                <th style="text-align: center;">Percentage Complete SP</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sprintSummaryBody"></tbody>
+                    </table>
+                </div>
+
+                <div id="sprintIssuesSection" style="display: none;">
+                    <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: var(--success-color);">Sprint Issues</h3>
+                    <div id="sprintIssuesHeader" style="margin-top: -0.25rem; margin-bottom: 1rem; color: #555; font-weight: 500;"></div>
+                    
+                    <!-- Completed Issues -->
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 1.5rem; margin-bottom: 0.5rem;">
+                        <h4 style="margin: 0; color: #28a745;">Completed Issues</h4>
+                        <div style="display: flex; align-items: center; gap: 0.4rem;">
+                            <button type="button" class="btn btn-secondary btn-small toggle-total-only" data-body="completedIssuesBody" style="padding: 0.2rem 0.5rem;">Only show Total</button>
+                            <button type="button" class="btn btn-secondary btn-small toggle-issues" data-target="completedIssuesContainer" aria-expanded="true" style="padding: 0.2rem 0.5rem;">Collapse</button>
+                        </div>
+                    </div>
+                    <div id="completedIssuesContainer" class="summary-table-container">
+                        <table class="summary-table summary-table-detailed">
+                            <thead>
+                                <tr>
+                                    <th>Key</th>
+                                    <th>Added Flag</th>
+                                    <th>Summary</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    <th class="platform-column">Platform</th>
+                                    <th>Story Points</th>
+                                </tr>
+                            </thead>
+                            <tbody id="completedIssuesBody"></tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Issues Not Completed -->
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 1.5rem; margin-bottom: 0.5rem;">
+                        <h4 style="margin: 0; color: #ffc107;">Issues Not Completed</h4>
+                        <div style="display: flex; align-items: center; gap: 0.4rem;">
+                            <button type="button" class="btn btn-secondary btn-small toggle-total-only" data-body="notCompletedIssuesBody" style="padding: 0.2rem 0.5rem;">Only show Total</button>
+                            <button type="button" class="btn btn-secondary btn-small toggle-issues" data-target="notCompletedIssuesContainer" aria-expanded="true" style="padding: 0.2rem 0.5rem;">Collapse</button>
+                        </div>
+                    </div>
+                    <div id="notCompletedIssuesContainer" class="summary-table-container">
+                        <table class="summary-table summary-table-detailed">
+                            <thead>
+                                <tr>
+                                    <th>Key</th>
+                                    <th>Added Flag</th>
+                                    <th>Summary</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    <th class="platform-column">Platform</th>
+                                    <th>Story Points</th>
+                                </tr>
+                            </thead>
+                            <tbody id="notCompletedIssuesBody"></tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Issues Removed From Sprint -->
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 1.5rem; margin-bottom: 0.5rem;">
+                        <h4 style="margin: 0; color: #dc3545;">Issues Removed From Sprint</h4>
+                        <div style="display: flex; align-items: center; gap: 0.4rem;">
+                            <button type="button" class="btn btn-secondary btn-small toggle-total-only" data-body="removedIssuesBody" style="padding: 0.2rem 0.5rem;">Only show Total</button>
+                            <button type="button" class="btn btn-secondary btn-small toggle-issues" data-target="removedIssuesContainer" aria-expanded="true" style="padding: 0.2rem 0.5rem;">Collapse</button>
+                        </div>
+                    </div>
+                    <div id="removedIssuesContainer" class="summary-table-container">
+                        <table class="summary-table summary-table-detailed">
+                            <thead>
+                                <tr>
+                                    <th>Key</th>
+                                    <th>Added Flag</th>
+                                    <th>Summary</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    <th class="platform-column">Platform</th>
+                                    <th>Story Points</th>
+                                </tr>
+                            </thead>
+                            <tbody id="removedIssuesBody"></tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Issues Completed in Another Sprint -->
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 1.5rem; margin-bottom: 0.5rem;">
+                        <h4 style="margin: 0; color: #17a2b8;">Issues Completed in Another Sprint</h4>
+                        <div style="display: flex; align-items: center; gap: 0.4rem;">
+                            <button type="button" class="btn btn-secondary btn-small toggle-total-only" data-body="completedInAnotherBody" style="padding: 0.2rem 0.5rem;">Only show Total</button>
+                            <button type="button" class="btn btn-secondary btn-small toggle-issues" data-target="completedInAnotherContainer" aria-expanded="true" style="padding: 0.2rem 0.5rem;">Collapse</button>
+                        </div>
+                    </div>
+                    <div id="completedInAnotherContainer" class="summary-table-container">
+                        <table class="summary-table summary-table-detailed">
+                            <thead>
+                                <tr>
+                                    <th>Key</th>
+                                    <th>Added Flag</th>
+                                    <th>Summary</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    <th class="platform-column">Platform</th>
+                                    <th>Story Points</th>
+                                </tr>
+                            </thead>
+                            <tbody id="completedInAnotherBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="jira_sprint_results.js"></script>
+</body>
+</html>

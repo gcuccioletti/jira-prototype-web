@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Jira Integration Tool - Connect and manage your Jira backlog">
+    <title>Jira Integration Tool</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="header-text">
+                    <h1>Jira Integration Tool</h1>
+                    <p class="subtitle">Connect to your Jira server and analyze the backlog</p>
+                    <div id="userInfo" class="user-info" hidden style="margin-top: 1rem; display: flex; align-items: center; gap: 1rem; justify-content: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1rem 2rem; border-radius: 12px; border: 2px solid rgba(255, 255, 255, 0.3); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);">
+                        <span style="font-weight: 700; color: #fff; font-size: 1rem;">You are connected to JIRA as:</span>
+                        <div class="user-avatar">
+                            <img id="userAvatar" alt="User avatar" />
+                            <div id="userInitials" class="user-initials"></div>
+                        </div>
+                        <div class="user-details">
+                            <span id="userName" class="user-name"></span>
+                            <span id="userEmail" class="user-email"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button id="setupBtn" class="btn btn-setup" aria-label="Open setup page" title="Configure your Jira server URL and authentication credentials">
+                        ⚙️ Setup Connection
+                    </button>
+                    <button type="button" id="disconnectBtn" class="btn btn-danger" aria-label="Reset connection" style="margin-left: 0.5rem;" title="Clear all saved connection settings and start fresh">
+                        🔄 Reset Connection
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <!-- Connection Status Section -->
+            <section class="connection-section" id="connectionSection">
+                <h2>🔄 Connecting to Jira...</h2>
+                <div id="connectionStatus" class="connection-status" role="alert" aria-live="polite">
+                    <p>Please wait while we establish a connection to your Jira server...</p>
+                </div>
+            </section>
+
+            <!-- Query Section -->
+            <section class="query-section" id="querySection" hidden>
+                <div style="padding: 2rem; text-align: center;">
+                    <p style="margin-bottom: 1.5rem;">Use the tools below to analyze your data.</p>
+                    
+                    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-top: 2rem;">
+                        <a href="jira_status_summary.html" class="btn btn-primary" style="min-width: 200px;" title="View summary statistics of issues grouped by status">
+                            📈 Status Summary
+                        </a>
+                        <a href="jql_status_summary.html" class="btn btn-primary" style="min-width: 200px;" title="Query and analyze Jira issues using JQL with status summaries">
+                            📋 JQL Status Summary
+                        </a>
+                        <a href="changelog-analyzer.html" class="btn btn-primary" style="min-width: 200px;" title="Analyze issue history and field changes over time">
+                            📊 Changelog Analyzer
+                        </a>
+                        <a href="status-analyzer.html" class="btn btn-primary" style="min-width: 200px;" title="Track status transitions and workflow patterns">
+                            🧭 Status Changelog
+                        </a>
+                        <a href="close-ticket-analyzer.html" class="btn btn-primary" style="min-width: 200px;" title="Analyze close-ticket changelog patterns and workflow transitions">
+                            ✅ Close Ticket Analyzer
+                        </a>
+                        <a href="time-analyzer.html" class="btn btn-primary" style="min-width: 200px;" title="Analyze time-based metrics and transitions">
+                            ⏱️ Time Analyzer
+                        </a>
+                        <a href="jira_sprint_results.html" class="btn btn-primary" style="min-width: 200px;" title="Review sprint outcomes and completion metrics">
+                            🏁 JIRA Sprint Results
+                        </a>
+                        <a href="release_delivery.html" class="btn btn-primary" style="min-width: 200px;" title="Track release metrics including throughput and kick back ratios">
+                            � Release Delivery
+                        </a>
+                    </div>
+                </div>
+
+                <div id="queryStatus" class="query-status" role="alert" aria-live="polite"></div>
+                
+                <!-- Summary Section -->
+                <div id="summarySection" class="summary-section" hidden>
+                    <h3>📊 Summary by Platform</h3>
+                    <div class="chart-controls" style="margin-bottom: 1rem; text-align: right;">
+                        <label for="chartMetricSelect" style="margin-right: 0.5rem; font-weight: 500;">Chart Metric:</label>
+                        <select id="chartMetricSelect" class="form-control" style="display: inline-block; width: auto; padding: 0.5rem;" onchange="window.updateChart && window.updateChart()">
+                            <option value="both">Both (Issues & Story Points)</option>
+                            <option value="issues">Issues Only</option>
+                            <option value="points">Story Points Only</option>
+                        </select>
+                    </div>
+                    <div class="chart-container" style="margin-bottom: 2rem;">
+                        <canvas id="summaryChart"></canvas>
+                    </div>
+                    <div id="summaryTableContainer" class="summary-table-container">
+                        <table id="summaryTable" class="summary-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col" class="sortable" data-sort="platform" data-table="summary">
+                                        Platform <span class="sort-arrow"></span>
+                                    </th>
+                                    <th scope="col" class="sortable" data-sort="issues" data-table="summary">
+                                        Issues <span class="sort-arrow"></span>
+                                    </th>
+                                    <th scope="col" class="sortable" data-sort="points" data-table="summary">
+                                        Story Points <span class="sort-arrow"></span>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="summaryTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Fix Version & Platform Summary Section -->
+                <div id="fixVersionPlatformSummarySection" class="summary-section" hidden>
+                    <h3>📊 Summary by Fix Version & Platform</h3>
+                    <div class="chart-controls" style="margin-bottom: 1rem; text-align: right;">
+                        <label for="fixVersionPlatformChartMetricSelect" style="margin-right: 0.5rem; font-weight: 500;">Chart Metric:</label>
+                        <select id="fixVersionPlatformChartMetricSelect" class="form-control" style="display: inline-block; width: auto; padding: 0.5rem;" onchange="window.updateFixVersionPlatformChart && window.updateFixVersionPlatformChart()">
+                            <option value="both">Both (Issues & Story Points)</option>
+                            <option value="issues">Issues Only</option>
+                            <option value="points">Story Points Only</option>
+                        </select>
+                    </div>
+                    <div class="chart-container" style="margin-bottom: 2rem;">
+                        <canvas id="fixVersionPlatformChart"></canvas>
+                    </div>
+                    <div id="fixVersionPlatformSummaryTableContainer" class="summary-table-container">
+                        <table id="fixVersionPlatformSummaryTable" class="summary-table summary-table-detailed">
+                            <thead>
+                                <tr>
+                                    <th scope="col" class="sortable" data-sort="fixversion" data-table="fixVersionPlatform">
+                                        Fix Version <span class="sort-arrow"></span>
+                                    </th>
+                                    <th scope="col" class="sortable" data-sort="platform" data-table="fixVersionPlatform">
+                                        Platform <span class="sort-arrow"></span>
+                                    </th>
+                                    <th scope="col" class="sortable" data-sort="issues" data-table="fixVersionPlatform">
+                                        Issues <span class="sort-arrow"></span>
+                                    </th>
+                                    <th scope="col" class="sortable" data-sort="points" data-table="fixVersionPlatform">
+                                        Story Points <span class="sort-arrow"></span>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="fixVersionPlatformSummaryTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Platform & Status Category Summary Section -->
+                <div id="platformStatusSummarySection" class="summary-section" hidden>
+                    <h3>📊 Summary by Platform & Status Category</h3>
+                    <div class="chart-controls" style="margin-bottom: 1rem; text-align: right;">
+                        <label for="platformStatusChartMetricSelect" style="margin-right: 0.5rem; font-weight: 500;">Chart Metric:</label>
+                        <select id="platformStatusChartMetricSelect" class="form-control" style="display: inline-block; width: auto; padding: 0.5rem;" onchange="window.updatePlatformStatusChart && window.updatePlatformStatusChart()">
+                            <option value="both">Both (Issues & Story Points)</option>
+                            <option value="issues">Issues Only</option>
+                            <option value="points">Story Points Only</option>
+                        </select>
+                    </div>
+                    <div class="chart-container" style="margin-bottom: 2rem;">
+                        <canvas id="platformStatusChart"></canvas>
+                    </div>
+                    <div id="platformStatusSummaryTableContainer" class="summary-table-container">
+                        <table id="platformStatusSummaryTable" class="summary-table summary-table-detailed">
+                            <thead id="platformStatusSummaryTableHead">
+                                <!-- Dynamic headers will be inserted here -->
+                            </thead>
+                            <tbody id="platformStatusSummaryTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section class="results-section" id="resultsSection" hidden>
+                <div class="results-header">
+                    <h2>Issues</h2>
+                    <div class="results-controls">
+                        <button id="exportBtn" class="btn btn-secondary btn-small" aria-label="Export results to CSV" title="Download issue data as a CSV file">
+                            📥 Export
+                        </button>
+                        <span id="issueCount" class="issue-count"></span>
+                    </div>
+                </div>
+
+                <div id="noResults" class="no-results" hidden>
+                    <p>No issues found. Try adjusting your query.</p>
+                </div>
+
+                <div id="tableScrollContainer" class="table-scroll-container">
+                    <table id="issuesTable" class="issues-table" role="table" hidden>
+                        <thead>
+                            <tr>
+                                <th scope="col" class="sortable-header" data-sort="key">Key <span class="sort-arrow"></span></th>
+                                <th scope="col" class="sortable-header" data-sort="summary">Summary <span class="sort-arrow"></span></th>
+                                <th scope="col" class="sortable-header" data-sort="type">Type <span class="sort-arrow"></span></th>
+                                <th scope="col" class="sortable-header" data-sort="status">Status <span class="sort-arrow"></span></th>
+                                <th scope="col" class="sortable-header" data-sort="statuscategory">Status Category <span class="sort-arrow"></span></th>
+                                <th scope="col" class="sortable-header" data-sort="priority">Priority <span class="sort-arrow"></span></th>
+                                <th scope="col" class="sortable-header" data-sort="platform">Platform <span class="sort-arrow"></span></th>
+                                <th scope="col" class="sortable-header" data-sort="team">Team <span class="sort-arrow"></span></th>
+                                <th scope="col" class="sortable-header" data-sort="assignee">Assignee <span class="sort-arrow"></span></th>
+                                <th scope="col" class="sortable-header" data-sort="created">Created <span class="sort-arrow"></span></th>
+                                <th scope="col" class="sortable-header" data-sort="fixversions">Fix Versions <span class="sort-arrow"></span></th>
+                                <th scope="col" class="sortable-header" data-sort="sprint">Sprint <span class="sort-arrow"></span></th>
+                                <th scope="col" class="sortable-header" data-sort="points">Story Points <span class="sort-arrow"></span></th>
+                            </tr>
+                        </thead>
+                        <tbody id="issuesTableBody">
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="cardView" class="card-view" hidden>
+                    <div id="issuesCards" class="issues-cards"></div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 1.5rem;">
+                <div style="display: flex; gap: 1rem;">
+                    <button id="exportLocalStorageBtn" class="btn btn-secondary" style="min-width: 220px;">EXPORT ALL LOCALSTORAGE DATA</button>
+                    <button id="importLocalStorageBtn" class="btn btn-secondary" style="min-width: 220px;">IMPORT ALL LOCALSTORAGE DATA</button>
+                </div>
+                <input type="file" id="importLocalStorageFile" accept="application/json" style="display: none;" />
+                <p style="margin: 0;">&copy; 2026 Jira Integration Tool. Built with ❤️ for better project management.</p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

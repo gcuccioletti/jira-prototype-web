@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Status Analyzer Configuration</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .config-container {
+            max-width: 900px;
+            margin: 2rem auto;
+        }
+
+        .template-form {
+            background: var(--card-background);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        .template-form h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 1rem;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+            font-family: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .templates-list {
+            background: var(--card-background);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .templates-list h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .template-item {
+            background: rgba(99, 102, 241, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            gap: 1rem;
+        }
+
+        .template-item-content {
+            flex: 1;
+        }
+
+        .template-item-name {
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            word-break: break-word;
+        }
+
+        .template-item-query {
+            font-family: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            word-break: break-all;
+            white-space: pre-wrap;
+        }
+
+        .template-item-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-shrink: 0;
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .btn-danger {
+            background: var(--error-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .no-templates {
+            text-align: center;
+            color: var(--text-secondary);
+            padding: 2rem 1rem;
+        }
+
+        .header-config {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="app-header">
+            <div class="header-content">
+                <div class="header-text">
+                    <h1>⚙️ Status Analyzer Configuration</h1>
+                    <div id="userInfo" class="user-info" hidden style="margin-top: 1rem; display: flex; align-items: center; gap: 1rem; justify-content: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1rem 2rem; border-radius: 12px; border: 2px solid rgba(255, 255, 255, 0.3); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);">
+                        <span style="font-weight: 700; color: #fff; font-size: 1rem;">You are connected to JIRA as:</span>
+                        <div class="user-avatar">
+                            <img id="userAvatar" src="" alt="User avatar" />
+                            <span id="userInitials" class="user-initials"></span>
+                        </div>
+                        <div class="user-details">
+                            <span id="userName" class="user-name"></span>
+                            <span id="userEmail" class="user-email"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <a href="status-analyzer.html" class="btn btn-secondary">← Back to Analyzer</a>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content config-container">
+            <!-- Add Template Form -->
+            <section class="template-form">
+                <h3>Add JQL Query Template</h3>
+                <form id="templateForm">
+                    <div class="form-group">
+                        <label for="templateName">Template Name</label>
+                        <input 
+                            type="text" 
+                            id="templateName" 
+                            name="templateName" 
+                            placeholder="e.g., Open Issues, In Progress Tasks"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="templateQuery">JQL Query</label>
+                        <textarea 
+                            id="templateQuery" 
+                            name="templateQuery" 
+                            placeholder="project = PROJ AND status != Done ORDER BY updated DESC"
+                            required
+                        ></textarea>
+                        <small>Enter a JQL query to save as a template</small>
+                    </div>
+
+                    <div class="form-buttons">
+                        <button type="submit" class="btn btn-primary">Save Template</button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Templates List -->
+            <section class="templates-list">
+                <h3>Saved Templates</h3>
+                <div id="templatesList" class="templates-container">
+                    <div class="no-templates">No templates saved yet</div>
+                </div>
+            </section>
+
+            <!-- Data Management Section -->
+            <section class="template-form" style="margin-top: 2rem;">
+                <h3>💾 Data Management</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Manage your stored configuration and data</p>
+                
+                <div style="background: rgba(99, 102, 241, 0.05); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem;">
+                    <p style="font-weight: 600; margin-bottom: 0.5rem;">Current Storage:</p>
+                    <ul id="storageInfo" style="list-style: none; padding: 0; margin: 0;">
+                        <li>Loading...</li>
+                    </ul>
+                </div>
+
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button id="exportConfigBtn" class="btn btn-secondary" title="Export all JQL templates to a JSON file">📥 Export Configuration</button>
+                    <button id="importConfigBtn" class="btn btn-secondary" title="Import JQL templates from a JSON file">📤 Import Configuration</button>
+                    <input type="file" id="importFileInput" accept=".json" style="display: none;">
+                </div>
+            </section>
+        </main>
+
+        <footer class="app-footer">
+            <p>Status Analyzer Configuration</p>
+        </footer>
+    </div>
+
+    <script src="status-analyzer-config.js"></script>
+</body>
+</html>

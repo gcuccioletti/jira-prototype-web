@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Status Analyzer Setup</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .setup-container {
+            max-width: none;
+            width: 100%;
+            margin: 2rem auto;
+        }
+
+        .setup-section {
+            background: var(--card-background);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        .setup-section h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .status-info {
+            background: rgba(99, 102, 241, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .status-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .status-badge {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.08));
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 8px;
+            padding: 0.75rem;
+            text-align: center;
+            font-weight: 600;
+            color: var(--primary-color);
+            font-size: 0.9rem;
+        }
+
+        .pattern-form {
+            display: grid;
+            grid-template-columns: 1fr 100px 1fr 1fr auto;
+            gap: 1rem;
+            align-items: end;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        .form-group input {
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        .form-group select {
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            background: #fff;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .pattern-form .btn {
+            height: 44px;
+        }
+
+        .patterns-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .patterns-table thead {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.08));
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .patterns-table th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .patterns-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: top;
+        }
+
+        .patterns-table tbody tr:hover {
+            background: rgba(99, 102, 241, 0.04);
+        }
+
+        .pattern-row {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .status-transition {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .btn-danger {
+            background: var(--error-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-reorder {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.4rem 0.6rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            min-width: 32px;
+        }
+
+        .btn-reorder:hover:not(:disabled) {
+            background: var(--secondary-color);
+        }
+
+        .btn-reorder:disabled {
+            background: var(--border-color);
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .btn-secondary:hover {
+            background: #7c3aed;
+        }
+
+        .no-patterns {
+            text-align: center;
+            color: var(--text-secondary);
+            padding: 2rem 1rem;
+        }
+
+        .loading-status {
+            text-align: center;
+            color: var(--text-secondary);
+            padding: 1rem;
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--error-color);
+            border-radius: 8px;
+            padding: 1rem;
+            color: var(--error-color);
+            margin-bottom: 1rem;
+        }
+
+        .success-message {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success-color);
+            border-radius: 8px;
+            padding: 1rem;
+            color: var(--success-color);
+            margin-bottom: 1rem;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--card-background);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .modal-header {
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        .modal-body {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .modal-footer button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            border: none;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-modal-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-modal-primary:hover {
+            background: var(--secondary-color);
+        }
+
+        .btn-modal-cancel {
+            background: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .btn-modal-cancel:hover {
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .modal-form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-form-group label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        .modal-form-group input,
+        .modal-form-group select {
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        .modal-form-group input:focus,
+        .modal-form-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .section-description {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .data-management {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .info-box {
+            background: rgba(99, 102, 241, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .info-box p {
+            margin: 0 0 1rem 0;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .info-box ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .info-box li {
+            padding: 0.5rem 0;
+            color: var(--text-primary);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .setup-section h2 {
+            margin-top: 0;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="app-header">
+            <div class="header-content">
+                <div class="header-text">
+                    <h1>📋 Status Analyzer Setup</h1>
+                    <div id="userInfo" class="user-info" hidden style="margin-top: 1rem; display: flex; align-items: center; gap: 1rem; justify-content: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1rem 2rem; border-radius: 12px; border: 2px solid rgba(255, 255, 255, 0.3); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);">
+                        <span style="font-weight: 700; color: #fff; font-size: 1rem;">You are connected to JIRA as:</span>
+                        <div class="user-avatar">
+                            <img id="userAvatar" src="" alt="User avatar" />
+                            <span id="userInitials" class="user-initials"></span>
+                        </div>
+                        <div class="user-details">
+                            <span id="userName" class="user-name"></span>
+                            <span id="userEmail" class="user-email"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <a href="status-analyzer.html" class="btn btn-secondary">← Back to Analyzer</a>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content setup-container">
+            <!-- Define Patterns -->
+            <section class="setup-section">
+                <h3>Define Status Patterns</h3>
+                <div id="messageContainer"></div>
+                
+                <div class="pattern-form">
+                    <div class="form-group">
+                        <label for="patternName">Pattern Name</label>
+                        <input 
+                            type="text" 
+                            id="patternName" 
+                            name="patternName" 
+                            placeholder="e.g., Start Work, Close Issue"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="patternPriority">Priority</label>
+                        <input 
+                            type="number" 
+                            id="patternPriority" 
+                            name="patternPriority" 
+                            placeholder="1"
+                            min="1"
+                            value="1"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fromStatus">From Status</label>
+                        <select id="fromStatus" name="fromStatus" required>
+                            <option value="">-- Select Status --</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="toStatus">To Status</label>
+                        <select id="toStatus" name="toStatus" required>
+                            <option value="">-- Select Status --</option>
+                        </select>
+                    </div>
+
+                    <button type="button" id="addPatternBtn" class="btn btn-primary">
+                        ➕ Add Pattern
+                    </button>
+                </div>
+
+                <!-- Patterns List -->
+                <div id="patternsContainer">
+                    <div class="no-patterns">No patterns defined yet</div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Data Management Section -->
+        <section class="setup-section">
+            <h2>💾 Data Management</h2>
+            <p class="section-description">Manage your stored configuration and data</p>
+            
+            <div class="data-management">
+                <div class="info-box">
+                    <p><strong>Current Storage:</strong></p>
+                    <ul id="storageInfo">
+                        <li>Loading...</li>
+                    </ul>
+                </div>
+
+                <div class="button-group">
+                    <button id="exportSetupBtn" class="btn btn-secondary" title="Export all status patterns to a JSON file">📥 Export Setup</button>
+                    <button id="importSetupBtn" class="btn btn-secondary" title="Import status patterns from a JSON file">📤 Import Setup</button>
+                    <input type="file" id="importFileInput" accept=".json" style="display: none;">
+                </div>
+            </div>
+        </section>
+
+        <!-- Edit Pattern Modal -->
+        <div id="editPatternModal" class="modal-overlay">
+            <div class="modal-content">
+                <h2 class="modal-header">Edit Pattern</h2>
+                <div class="modal-body">
+                    <div class="modal-form-group">
+                        <label for="editPatternName">Pattern Name</label>
+                        <input type="text" id="editPatternName" required>
+                    </div>
+                    <div class="modal-form-group">
+                        <label for="editPatternPriority">Priority</label>
+                        <input type="number" id="editPatternPriority" min="1" required>
+                    </div>
+                    <div class="modal-form-group">
+                        <label for="editFromStatus">From Status</label>
+                        <select id="editFromStatus" required>
+                            <option value="">-- Select Status --</option>
+                        </select>
+                    </div>
+                    <div class="modal-form-group">
+                        <label for="editToStatus">To Status</label>
+                        <select id="editToStatus" required>
+                            <option value="">-- Select Status --</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-modal-cancel" onclick="window.setupApp.closeEditModal()">Cancel</button>
+                    <button type="button" class="btn-modal-primary" onclick="window.setupApp.saveEditPattern()">Save Changes</button>
+                </div>
+            </div>
+        </div>
+
+        <footer class="app-footer">
+            <p>Status Analyzer Setup</p>
+        </footer>
+    </div>
+
+    <script src="status-analyzer-setup.js"></script>
+</body>
+</html>

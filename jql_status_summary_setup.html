@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Jira Integration Tool - Setup Configuration">
+    <title>Setup - Jira Integration Tool</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="header-text">
+                    <h1>JQL Status Summary - Configuration</h1>
+                    <p class="subtitle">Configure your query preferences</p>
+                    <div id="userInfo" class="user-info" hidden style="margin-top: 1rem; display: flex; align-items: center; gap: 1rem; justify-content: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1rem 2rem; border-radius: 12px; border: 2px solid rgba(255, 255, 255, 0.3); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);">
+                        <span style="font-weight: 700; color: #fff; font-size: 1rem;">You are connected to JIRA as:</span>
+                        <div class="user-avatar">
+                            <img id="userAvatar" src="" alt="User avatar" />
+                            <span id="userInitials" class="user-initials"></span>
+                        </div>
+                        <div class="user-details">
+                            <span id="userName" class="user-name"></span>
+                            <span id="userEmail" class="user-email"></span>
+                        </div>
+                    </div>
+                </div>
+                <button id="backBtn" class="btn btn-setup" aria-label="Back to status summary page" onclick="window.location.href='jql_status_summary.html'">
+                    ← Back
+                </button>
+            </div>
+        </header>
+
+        <main>
+            <!-- JQL Templates Section -->
+            <section class="setup-section">
+                <h2>📋 JQL Templates</h2>
+                <p class="section-description">Save custom JQL query templates for quick access</p>
+                
+                <form id="jqlTemplateForm" class="form">
+                    <div class="form-group">
+                        <label for="templateName">Template Name</label>
+                        <input
+                            type="text"
+                            id="templateName"
+                            name="templateName"
+                            placeholder="e.g., Sprint Backlog"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="templateQuery">JQL Query</label>
+                        <textarea
+                            id="templateQuery"
+                            name="templateQuery"
+                            placeholder="project = PROJ AND type in (Story, Bug) AND status = 'In Progress'"
+                            rows="3"
+                        ></textarea>
+                        <small>Enter your JQL query to save as a template</small>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Save Template</button>
+                </form>
+
+                <div id="templateSaveResult" class="status-message" role="alert" aria-live="polite"></div>
+
+                <div id="savedTemplates" class="saved-templates">
+                    <h3>Saved Templates</h3>
+                    <div id="templatesList" class="templates-list"></div>
+                </div>
+            </section>
+
+            <!-- Preferred Statuses Section -->
+            <section class="setup-section">
+                <h2>✅ Preferred Statuses</h2>
+                <p class="section-description">Select the Jira statuses you want to include</p>
+
+                <div class="form-group">
+                    <button type="button" id="loadPreferredStatusesBtn" class="btn btn-secondary">
+                        🔄 Load Jira Statuses
+                    </button>
+                    <small>Load all statuses from Jira for selection</small>
+                </div>
+
+                <div id="preferredStatusesContainer" class="preferred-teams-container" hidden>
+                    <div class="form-group">
+                        <label>Select Preferred Statuses</label>
+                        <input
+                            type="text"
+                            id="preferredStatusesSearch"
+                            class="form-control"
+                            placeholder="Search statuses..."
+                            aria-label="Search statuses"
+                            style="margin-bottom: 0.75rem;"
+                        >
+                        <div id="preferredStatusesList" class="preferred-teams-list">
+                            <!-- Statuses will be loaded here -->
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="button" id="savePreferredStatusesBtn" class="btn btn-primary">Save Preferred Statuses</button>
+                        <button type="button" id="clearPreferredStatusesBtn" class="btn btn-secondary">Clear Selection</button>
+                    </div>
+                </div>
+
+                <div id="preferredStatusesSaveResult" class="status-message" role="alert" aria-live="polite"></div>
+
+                <div id="savedPreferredStatuses" class="saved-preferences" hidden>
+                    <h3>Currently Saved Preferred Statuses</h3>
+                    <div id="savedPreferredStatusesList" class="saved-list"></div>
+                </div>
+            </section>
+
+            <!-- Data Management Section -->
+            <section class="setup-section">
+                <h2>💾 Data Management</h2>
+                <p class="section-description">Manage your stored configuration and data</p>
+                
+                <div class="data-management">
+                    <div class="info-box">
+                        <p><strong>Current Storage:</strong></p>
+                        <ul id="storageInfo">
+                            <li>Loading...</li>
+                        </ul>
+                    </div>
+
+                    <div class="button-group">
+                        <button id="exportConfigBtn" class="btn btn-secondary">Export Configuration</button>
+                        <button id="importConfigBtn" class="btn btn-secondary">Import Configuration</button>
+                        <button id="clearAllBtn" class="btn btn-danger">Clear All Settings</button>
+                    </div>
+                    <input type="file" id="importFileInput" accept=".json" style="display: none;">
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 Jira Integration Tool. Built with ❤️ for better project management.</p>
+        </footer>
+    </div>
+
+    <script src="setup.js"></script>
+    <script src="jql_status_summary_setup.js"></script>
+</body>
+</html>

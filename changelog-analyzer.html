@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JIRA Changelog Analyzer</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="app-header">
+            <div class="header-content">
+                <div class="header-text">
+                    <h1>📊 JIRA Changelog Analyzer</h1>
+                    <div id="userInfo" class="user-info" hidden style="margin-top: 1rem; display: flex; align-items: center; gap: 1rem; justify-content: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1rem 2rem; border-radius: 12px; border: 2px solid rgba(255, 255, 255, 0.3); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);">
+                        <span style="font-weight: 700; color: #fff; font-size: 1rem;">You are connected to JIRA as:</span>
+                        <div class="user-avatar">
+                            <img id="userAvatar" src="" alt="User avatar" />
+                            <span id="userInitials" class="user-initials"></span>
+                        </div>
+                        <div class="user-details">
+                            <span id="userName" class="user-name"></span>
+                            <span id="userEmail" class="user-email"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <a href="index.html" class="btn btn-secondary">← Back to JIRA Tool</a>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <!-- Input Section -->
+            <section class="input-section card">
+                <h2>Analyze Ticket Changelog</h2>
+                <form id="analyzerForm" class="analyzer-form">
+                    <div class="form-group">
+                        <label for="ticketKey">JIRA Ticket Key</label>
+                        <input 
+                            type="text" 
+                            id="ticketKey" 
+                            name="ticketKey" 
+                            placeholder="e.g., OPR-1234" 
+                            pattern="[A-Z]+-[0-9]+"
+                            required
+                            class="form-control"
+                        >
+                        <small>Enter the ticket key (e.g., PROJECT-123)</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Timeframe (Optional)</label>
+                        <div class="date-range-inputs">
+                            <div class="date-input-wrapper">
+                                <label for="startDate" class="small-label">From</label>
+                                <input 
+                                    type="datetime-local" 
+                                    id="startDate" 
+                                    name="startDate" 
+                                    class="form-control"
+                                >
+                            </div>
+                            <div class="date-input-wrapper">
+                                <label for="endDate" class="small-label">To</label>
+                                <input 
+                                    type="datetime-local" 
+                                    id="endDate" 
+                                    name="endDate" 
+                                    class="form-control"
+                                >
+                            </div>
+                        </div>
+                        <small>Leave blank to analyze all changes</small>
+                    </div>
+
+                    <button type="submit" id="analyzeBtn" class="btn btn-primary">
+                        🔍 Analyze Changelog
+                    </button>
+                </form>
+                <div id="statusMessage" class="status-message" hidden></div>
+            </section>
+
+            <!-- Ticket Info Section -->
+            <section id="ticketInfoSection" class="ticket-info-section card" hidden>
+                <h2>Ticket Information</h2>
+                <div class="ticket-details">
+                    <div class="detail-item">
+                        <span class="detail-label">Key:</span>
+                        <span id="ticketKeyDisplay" class="detail-value"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Summary:</span>
+                        <span id="ticketSummary" class="detail-value"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Status:</span>
+                        <span id="ticketStatus" class="detail-value"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Assignee:</span>
+                        <span id="ticketAssignee" class="detail-value"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Total Changes:</span>
+                        <span id="changeCount" class="detail-value"></span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- AI Analysis Section -->
+            <section id="aiAnalysisSection" class="ai-analysis-section card" hidden>
+                <div class="section-header">
+                    <h2>🤖 AI Analysis</h2>
+                    <div class="section-actions">
+                        <button id="exportBtn" class="btn btn-secondary btn-small">📥 Export</button>
+                        <button id="refreshAnalysisBtn" class="btn btn-secondary btn-small">🔄 Re-analyze</button>
+                    </div>
+                </div>
+                <div id="aiAnalysisContent" class="analysis-content"></div>
+            </section>
+
+            <!-- Raw Changelog Section -->
+            <section id="changelogSection" class="changelog-section card" hidden>
+                <div class="section-header">
+                    <h2>Changelog History</h2>
+                    <button id="toggleChangelogBtn" class="btn btn-secondary btn-small">
+                        ▼ Show Details
+                    </button>
+                </div>
+                <div id="changelogContent" class="changelog-content" hidden>
+                    <div class="changelog-controls">
+                        <input 
+                            type="text" 
+                            id="changelogSearch" 
+                            placeholder="Filter by field or value..." 
+                            class="form-control"
+                        >
+                    </div>
+                    <div class="table-container">
+                        <table id="changelogTable" class="changelog-table">
+                            <thead>
+                                <tr>
+                                    <th class="sortable" data-sort="date">Date <span class="sort-arrow"></span></th>
+                                    <th class="sortable" data-sort="author">Author <span class="sort-arrow"></span></th>
+                                    <th class="sortable" data-sort="field">Field <span class="sort-arrow"></span></th>
+                                    <th>From</th>
+                                    <th>To</th>
+                                </tr>
+                            </thead>
+                            <tbody id="changelogTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="app-footer">
+            <p>JIRA Changelog Analyzer - Powered by AI</p>
+        </footer>
+    </div>
+
+    <script src="changelog-analyzer.js"></script>
+</body>
+</html>

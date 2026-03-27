@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="JQL Status Summary - Query and analyze your Jira issues">
+    <title>JQL Status Summary</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="header-text">
+                    <h1>JQL Status Summary</h1>
+                    <p class="subtitle">Query and analyze your Jira issues by platform and status</p>
+                    <div id="userInfo" class="user-info" hidden style="margin-top: 1rem; display: flex; align-items: center; gap: 1rem; justify-content: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1rem 2rem; border-radius: 12px; border: 2px solid rgba(255, 255, 255, 0.3); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);">
+                        <span style="font-weight: 700; color: #fff; font-size: 1rem;">You are connected to JIRA as:</span>
+                        <div class="user-avatar">
+                            <img id="userAvatar" src="" alt="User avatar" />
+                            <span id="userInitials" class="user-initials"></span>
+                        </div>
+                        <div class="user-details">
+                            <span id="userName" class="user-name"></span>
+                            <span id="userEmail" class="user-email"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <a href="index.html" class="btn btn-secondary" style="margin-right: 0.5rem;">
+                        ← Back to Main
+                    </a>
+                    <button id="setupBtn" class="btn btn-setup" aria-label="Open configuration page">
+                        ⚙️ Configuration
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <!-- Connection Status Section -->
+            <section class="connection-section" id="connectionSection">
+                <h2>🔄 Connecting to Jira...</h2>
+                <div id="connectionStatus" class="connection-status" role="alert" aria-live="polite">
+                    <p>Please wait while we establish a connection to your Jira server...</p>
+                </div>
+            </section>
+
+            <!-- Query Section -->
+            <section class="query-section" id="querySection" hidden>
+                <h2>Query Jira</h2>
+                <form id="queryForm" class="form" aria-label="Jira query form">
+                    <div class="form-group">
+                        <label for="templateSelect">📋 Saved Templates</label>
+                        <div class="template-selector">
+                            <select id="templateSelect" name="templateSelect" aria-label="Select a saved JQL template">
+                                <option value="">-- Select a template --</option>
+                            </select>
+                            <button type="button" id="loadTemplateBtn" class="btn btn-small btn-secondary" disabled>
+                                ▶️ Use Template
+                            </button>
+                        </div>
+                        <small>Load a saved JQL template with your default values</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="jqlQuery">Custom JQL Query (Optional)</label>
+                        <textarea
+                            id="jqlQuery"
+                            name="jqlQuery"
+                            placeholder="project = PROJ AND type in (Story, Bug, Task) AND status != Done ORDER BY rank ASC"
+                            rows="3"
+                            aria-describedby="jqlHelp"
+                        ></textarea>
+                        <small id="jqlHelp">If provided, this overrides the project key and team filters</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input
+                                type="checkbox"
+                                id="showProjectStatusSummary"
+                                name="showProjectStatusSummary"
+                                checked
+                            >
+                            <span>Show Summary by Project vs. Status</span>
+                        </label>
+                        <small>Display a summary table grouping by project and status</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input
+                                type="checkbox"
+                                id="showProjectTeamStatusSummary"
+                                name="showProjectTeamStatusSummary"
+                                checked
+                            >
+                            <span>Show Summary by Project, Team vs. Status</span>
+                        </label>
+                        <small>Display a summary table grouping by project, team, and status</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input
+                                type="checkbox"
+                                id="showPlatformSummary"
+                                name="showPlatformSummary"
+                                checked
+                            >
+                            <span>Show Summary by Platform</span>
+                        </label>
+                        <small>Display a summary table grouping issues and story points by platform</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input
+                                type="checkbox"
+                                id="showPlatformStatusCategorySummary"
+                                name="showPlatformStatusCategorySummary"
+                                checked
+                            >
+                            <span>Show Summary by Platform vs. Status Category</span>
+                        </label>
+                        <small>Display a summary table grouping by platform and status category</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input
+                                type="checkbox"
+                                id="showPlatformStatusSummaryByStatus"
+                                name="showPlatformStatusSummaryByStatus"
+                                checked
+                            >
+                            <span>Show Summary by Platform vs. Status</span>
+                        </label>
+                        <small>Display a summary table grouping by platform and status</small>
+                    </div>
+
+                    <button type="submit" id="loadIssuesBtn" class="btn btn-primary">
+                        <span class="btn-text">Load Issues</span>
+                        <span class="btn-spinner" style="display: none;">⏳ Loading...</span>
+                    </button>
+                    <button type="button" id="disconnectBtn" class="btn btn-danger">Reset Connection</button>
+                </form>
+
+                <div id="queryStatus" class="query-status" role="alert" aria-live="polite"></div>
+                
+                <!-- Status Filter Section -->
+                <div id="statusFilterSection" class="status-filter-section" hidden style="margin-bottom: 1.5rem; padding: 1rem; background-color: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6;">
+                    <h4 class="collapsible-header filter-header collapsed" data-target="statusFilterContent" style="margin: 0 0 1rem 0; font-size: 1rem; font-weight: 600;">
+                        <span class="collapse-icon">▼</span>
+                        <span>📋 Filter by Status</span>
+                    </h4>
+                    <div id="statusFilterContent" class="collapsible-content filter-content collapsed">
+                        <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-bottom: 1rem;">
+                            <button type="button" id="selectAllStatusesBtn" class="btn btn-small btn-secondary">Select All</button>
+                            <button type="button" id="deselectAllStatusesBtn" class="btn btn-small btn-secondary">Deselect All</button>
+                        </div>
+                        <div id="statusCheckboxesContainer" class="status-checkboxes" style="display: flex; flex-wrap: wrap; gap: 1rem;">
+                            <!-- Status checkboxes will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status Category Filter Section -->
+                <div id="statusCategoryFilterSection" class="status-filter-section" hidden style="margin-bottom: 1.5rem; padding: 1rem; background-color: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6;">
+                    <h4 class="collapsible-header filter-header collapsed" data-target="statusCategoryFilterContent" style="margin: 0 0 1rem 0; font-size: 1rem; font-weight: 600;">
+                        <span class="collapse-icon">▼</span>
+                        <span>🧭 Filter by Status Category</span>
+                    </h4>
+                    <div id="statusCategoryFilterContent" class="collapsible-content filter-content collapsed">
+                        <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-bottom: 1rem;">
+                            <button type="button" id="selectAllStatusCategoriesBtn" class="btn btn-small btn-secondary">Select All</button>
+                            <button type="button" id="deselectAllStatusCategoriesBtn" class="btn btn-small btn-secondary">Deselect All</button>
+                        </div>
+                        <div id="statusCategoryCheckboxesContainer" class="status-checkboxes" style="display: flex; flex-wrap: wrap; gap: 1rem;">
+                            <!-- Status category checkboxes will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Platform Filter Section -->
+                <div id="platformFilterSection" class="status-filter-section" hidden style="margin-bottom: 1.5rem; padding: 1rem; background-color: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6;">
+                    <h4 class="collapsible-header filter-header collapsed" data-target="platformFilterContent" style="margin: 0 0 1rem 0; font-size: 1rem; font-weight: 600;">
+                        <span class="collapse-icon">▼</span>
+                        <span>🏷️ Filter by Platform</span>
+                    </h4>
+                    <div id="platformFilterContent" class="collapsible-content filter-content collapsed">
+                        <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-bottom: 1rem;">
+                            <button type="button" id="selectAllPlatformsBtn" class="btn btn-small btn-secondary">Select All</button>
+                            <button type="button" id="deselectAllPlatformsBtn" class="btn btn-small btn-secondary">Deselect All</button>
+                        </div>
+                        <div id="platformCheckboxesContainer" class="status-checkboxes" style="display: flex; flex-wrap: wrap; gap: 1rem;">
+                            <!-- Platform checkboxes will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project Filter Section -->
+                <div id="projectFilterSection" class="status-filter-section" hidden style="margin-bottom: 1.5rem; padding: 1rem; background-color: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6;">
+                    <h4 class="collapsible-header filter-header collapsed" data-target="projectFilterContent" style="margin: 0 0 1rem 0; font-size: 1rem; font-weight: 600;">
+                        <span class="collapse-icon">▼</span>
+                        <span>📁 Filter by Project</span>
+                    </h4>
+                    <div id="projectFilterContent" class="collapsible-content filter-content collapsed">
+                        <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-bottom: 1rem;">
+                            <button type="button" id="selectAllProjectsBtn" class="btn btn-small btn-secondary">Select All</button>
+                            <button type="button" id="deselectAllProjectsBtn" class="btn btn-small btn-secondary">Deselect All</button>
+                        </div>
+                        <div id="projectCheckboxesContainer" class="status-checkboxes" style="display: flex; flex-wrap: wrap; gap: 1rem;">
+                            <!-- Project checkboxes will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Team Filter Section -->
+                <div id="teamFilterSection" class="status-filter-section" hidden style="margin-bottom: 1.5rem; padding: 1rem; background-color: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6;">
+                    <h4 class="collapsible-header filter-header collapsed" data-target="teamFilterContent" style="margin: 0 0 1rem 0; font-size: 1rem; font-weight: 600;">
+                        <span class="collapse-icon">▼</span>
+                        <span>👥 Filter by Team</span>
+                    </h4>
+                    <div id="teamFilterContent" class="collapsible-content filter-content collapsed">
+                        <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-bottom: 1rem;">
+                            <button type="button" id="selectAllTeamsBtn" class="btn btn-small btn-secondary">Select All</button>
+                            <button type="button" id="deselectAllTeamsBtn" class="btn btn-small btn-secondary">Deselect All</button>
+                        </div>
+                        <div id="teamCheckboxesContainer" class="status-checkboxes" style="display: flex; flex-wrap: wrap; gap: 1rem;">
+                            <!-- Team checkboxes will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fix Version Filter Section -->
+                <div id="fixVersionFilterSection" class="status-filter-section" hidden style="margin-bottom: 1.5rem; padding: 1rem; background-color: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6;">
+                    <h4 class="collapsible-header filter-header collapsed" data-target="fixVersionFilterContent" style="margin: 0 0 1rem 0; font-size: 1rem; font-weight: 600;">
+                        <span class="collapse-icon">▼</span>
+                        <span>🏷️ Filter by Fix Version</span>
+                    </h4>
+                    <div id="fixVersionFilterContent" class="collapsible-content filter-content collapsed">
+                        <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-bottom: 1rem;">
+                            <button type="button" id="selectAllFixVersionsBtn" class="btn btn-small btn-secondary">Select All</button>
+                            <button type="button" id="deselectAllFixVersionsBtn" class="btn btn-small btn-secondary">Deselect All</button>
+                        </div>
+                        <div id="fixVersionCheckboxesContainer" class="status-checkboxes" style="display: flex; flex-wrap: wrap; gap: 1rem;">
+                            <!-- Fix Version checkboxes will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; margin-bottom: 0.75rem;">
+                    <button id="exportBtn" class="btn btn-secondary btn-small" aria-label="Export issues to Excel" hidden>
+                        📥 Export to Excel
+                    </button>
+                </div>
+
+                <!-- Project Status Summary Section -->
+                <div id="projectStatusSummarySection" class="summary-section" hidden>
+                    <h3 class="collapsible-header" data-target="projectStatusSummaryTableContainer">
+                        <span class="collapse-icon">▼</span>
+                        <span>📊 Summary by Project & Status</span>
+                    </h3>
+                    <div id="projectStatusSummaryTableContainer" class="summary-table-container collapsible-content">
+                        <table id="projectStatusSummaryTable" class="summary-table summary-table-detailed">
+                            <thead id="projectStatusSummaryTableHead">
+                                <!-- Dynamic headers will be inserted here -->
+                            </thead>
+                            <tbody id="projectStatusSummaryTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Project & Team Status Summary Section -->
+                <div id="projectTeamStatusSummarySection" class="summary-section" hidden>
+                    <h3 class="collapsible-header" data-target="projectTeamStatusSummaryTableContainer">
+                        <span class="collapse-icon">▼</span>
+                        <span>📊 Summary by Project, Team & Status</span>
+                    </h3>
+                    
+                    <div id="projectTeamStatusSummaryTableContainer" class="summary-table-container collapsible-content">
+                        <table id="projectTeamStatusSummaryTable" class="summary-table summary-table-detailed">
+                            <thead id="projectTeamStatusSummaryTableHead">
+                                <!-- Dynamic headers will be inserted here -->
+                            </thead>
+                            <tbody id="projectTeamStatusSummaryTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Platform Summary Section -->
+                <div id="summarySection" class="summary-section" hidden>
+                    <h3 class="collapsible-header" data-target="summaryTableContainer">
+                        <span class="collapse-icon">▼</span>
+                        <span>📊 Summary by Platform</span>
+                    </h3>
+                    <div id="summaryTableContainer" class="summary-table-container collapsible-content">
+                        <table id="summaryTable" class="summary-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col" class="sortable" data-sort="platform" data-table="summary">
+                                        Platform <span class="sort-arrow"></span>
+                                    </th>
+                                    <th scope="col" class="sortable" data-sort="issues" data-table="summary">
+                                        Issues <span class="sort-arrow"></span>
+                                    </th>
+                                    <th scope="col" class="sortable" data-sort="points" data-table="summary">
+                                        Story Points <span class="sort-arrow"></span>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="summaryTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Platform & Status Category Summary Section -->
+                <div id="platformStatusSummarySection" class="summary-section" hidden>
+                    <h3 class="collapsible-header" data-target="platformStatusSummaryTableContainer">
+                        <span class="collapse-icon">▼</span>
+                        <span>📊 Summary by Platform & Status Category</span>
+                    </h3>
+                    <div id="platformStatusSummaryTableContainer" class="summary-table-container collapsible-content">
+                        <table id="platformStatusSummaryTable" class="summary-table summary-table-detailed">
+                            <thead id="platformStatusSummaryTableHead">
+                                <!-- Dynamic headers will be inserted here -->
+                            </thead>
+                            <tbody id="platformStatusSummaryTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Platform Status Summary Section -->
+                <div id="platformStatusSummaryByStatusSection" class="summary-section" hidden>
+                    <h3 class="collapsible-header" data-target="platformStatusSummaryByStatusTableContainer">
+                        <span class="collapse-icon">▼</span>
+                        <span>📊 Summary by Platform & Status</span>
+                    </h3>
+                    <div id="platformStatusSummaryByStatusTableContainer" class="summary-table-container collapsible-content">
+                        <table id="platformStatusSummaryByStatusTable" class="summary-table summary-table-detailed">
+                            <thead id="platformStatusSummaryByStatusTableHead">
+                                <!-- Dynamic headers will be inserted here -->
+                            </thead>
+                            <tbody id="platformStatusSummaryByStatusTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section class="results-section" id="resultsSection" hidden>
+                <div class="results-header">
+                    <h2>Issues</h2>
+                    <div class="results-controls">
+                        <button id="showInJiraBtn" class="btn btn-secondary" title="Open these issues in Jira">Show in Jira</button>
+                        <span id="issueCount" class="issue-count"></span>
+                    </div>
+                </div>
+
+                <div id="noResults" class="no-results" hidden>
+                    <p>No issues found. Try adjusting your query.</p>
+                </div>
+
+                <div id="tableScrollContainer" class="table-scroll-container">
+                    <table id="issuesTable" class="issues-table" role="table" hidden>
+                        <thead>
+                            <tr>
+                                <th scope="col" class="sortable-header" data-sort="key">Key <span class="sort-arrow"></span></th>
+                                <th scope="col" class="sortable-header" data-sort="project">Project <span class="sort-arrow"></span></th>
+                                <th scope="col" class="sortable-header" data-sort="team">Team <span class="sort-arrow"></span></th>
+                                <th scope="col" class="sortable-header" data-sort="summary">Summary <span class="sort-arrow"></span></th>
+                                <th scope="col" class="sortable-header" data-sort="type">Type <span class="sort-arrow"></span></th>
+                                <th scope="col" class="sortable-header" data-sort="priority">Priority <span class="sort-arrow"></span></th>
+                                <th scope="col" class="sortable-header" data-sort="status">Status <span class="sort-arrow"></span></th>
+                                <th scope="col" class="sortable-header status-category-column" data-sort="statuscategory" style="display: none;">Status Category <span class="sort-arrow"></span></th>
+                                <th scope="col" class="sortable-header" data-sort="platform">Platform <span class="sort-arrow"></span></th>
+                                <th scope="col" class="sortable-header" data-sort="assignee">Assignee <span class="sort-arrow"></span></th>
+                                <th scope="col" class="sortable-header" data-sort="created">Created <span class="sort-arrow"></span></th>
+                                <th scope="col" class="sortable-header" data-sort="laststatuschanged">Last Status Changed <span class="sort-arrow"></span></th>
+                                <th scope="col" class="sortable-header" data-sort="aging">Aging <span class="sort-arrow"></span></th>
+                                <th scope="col" class="sortable-header" data-sort="fixversions">Fix Versions <span class="sort-arrow"></span></th>
+                                <th scope="col" class="sortable-header" data-sort="sprint">Sprint <span class="sort-arrow"></span></th>
+                                <th scope="col" class="sortable-header" data-sort="points">Story Points <span class="sort-arrow"></span></th>
+                            </tr>
+                        </thead>
+                        <tbody id="issuesTableBody">
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="cardView" class="card-view" hidden>
+                    <div id="issuesCards" class="issues-cards"></div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 Jira Integration Tool. Built with ❤️ for better project management.</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

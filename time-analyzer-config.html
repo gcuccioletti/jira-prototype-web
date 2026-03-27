@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Analyzer Configuration</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        ...existing code from status-analyzer-config.html styles...
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="app-header">
+            <div class="header-content">
+                <div class="header-text">
+                    <h1>⏱️ Time Analyzer Configuration</h1>
+                    <div id="userInfo" class="user-info" hidden style="margin-top: 1rem; display: flex; align-items: center; gap: 1rem; justify-content: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1rem 2rem; border-radius: 12px; border: 2px solid rgba(255, 255, 255, 0.3); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);">
+                        <span style="font-weight: 700; color: #fff; font-size: 1rem;">You are connected to JIRA as:</span>
+                        <div class="user-avatar">
+                            <img id="userAvatar" src="" alt="User avatar" />
+                            <span id="userInitials" class="user-initials"></span>
+                        </div>
+                        <div class="user-details">
+                            <span id="userName" class="user-name"></span>
+                            <span id="userEmail" class="user-email"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <a href="time-analyzer.html" class="btn btn-secondary">← Back to Analyzer</a>
+                </div>
+            </div>
+        </header>
+        <main class="main-content config-container">
+            <!-- Add Template Form -->
+            <section class="template-form">
+                <h3>Add JQL Query Template</h3>
+                <form id="templateForm">
+                    <div class="form-group">
+                        <label for="templateName">Template Name</label>
+                        <input 
+                            type="text" 
+                            id="templateName" 
+                            name="templateName" 
+                            placeholder="e.g., Open Issues, In Progress Tasks"
+                            required
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label for="templateQuery">JQL Query</label>
+                        <textarea 
+                            id="templateQuery" 
+                            name="templateQuery" 
+                            placeholder="project = PROJ AND status != Done ORDER BY updated DESC"
+                            required
+                        ></textarea>
+                        <small>Enter a JQL query to save as a template</small>
+                    </div>
+                    <div class="form-buttons">
+                        <button type="submit" class="btn btn-primary">Save Template</button>
+                    </div>
+                </form>
+            </section>
+            <!-- Templates List -->
+            <section class="templates-list">
+                <h3>Saved Templates</h3>
+                <div id="templatesList" class="templates-container">
+                    <div class="no-templates">No templates saved yet</div>
+                </div>
+            </section>
+            <!-- Data Management Section -->
+            <section class="template-form" style="margin-top: 2rem;">
+                <h3>💾 Data Management</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Manage your stored configuration and data</p>
+                <div style="background: rgba(99, 102, 241, 0.05); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem;">
+                    <p style="font-weight: 600; margin-bottom: 0.5rem;">Current Storage:</p>
+                    <ul id="storageInfo" style="list-style: none; padding: 0; margin: 0;">
+                        <li>Loading...</li>
+                    </ul>
+                </div>
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button id="exportConfigBtn" class="btn btn-secondary" title="Export all JQL templates to a JSON file">📥 Export Configuration</button>
+                    <button id="importConfigBtn" class="btn btn-secondary" title="Import JQL templates from a JSON file">📤 Import Configuration</button>
+                    <input type="file" id="importFileInput" accept=".json" style="display: none;">
+                </div>
+            </section>
+        </main>
+        <footer class="app-footer">
+            <p>Time Analyzer Configuration</p>
+        </footer>
+    </div>
+    <script src="time-analyzer-config.js"></script>
+</body>
+</html>

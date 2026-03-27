@@ -1,0 +1,2329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Release Delivery Configuration</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .config-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+
+        .config-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .config-section h3 {
+            margin-top: 0;
+            color: #667eea;
+            margin-bottom: 1.5rem;
+            font-size: 1.3rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+            font-family: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group small {
+            display: block;
+            margin-top: 0.25rem;
+            color: #666;
+            font-size: 0.875rem;
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+
+        .templates-list {
+            margin-top: 2rem;
+        }
+
+        .template-item {
+            background: rgba(102, 126, 234, 0.05);
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            gap: 1rem;
+        }
+
+        .template-item-content {
+            flex: 1;
+        }
+
+        .template-item-name {
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .template-item-query {
+            font-family: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            font-size: 0.85rem;
+            color: #666;
+            word-break: break-all;
+            white-space: pre-wrap;
+        }
+
+        .template-item-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-shrink: 0;
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .no-templates {
+            text-align: center;
+            color: #666;
+            padding: 2rem 1rem;
+        }
+
+        .success-message {
+            background: #10b981;
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .projects-container {
+            margin-top: 1rem;
+        }
+
+        .projects-list {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 1rem;
+            background: #f9f9f9;
+        }
+
+        .project-checkbox-label {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .project-checkbox-label:hover {
+            background: #f0f0f0;
+        }
+
+        .project-checkbox {
+            margin-right: 0.75rem;
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+        }
+
+        .project-info {
+            flex: 1;
+        }
+
+        .project-info strong {
+            color: #667eea;
+        }
+
+        .projects-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .selected-count {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 0.5rem;
+        }
+
+        .releases-container {
+            margin-top: 1rem;
+        }
+
+        .releases-list {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 1rem;
+            background: #f9f9f9;
+        }
+
+        .release-checkbox-label {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .release-checkbox-label:hover {
+            background: #f0f0f0;
+        }
+
+        .release-checkbox {
+            margin-right: 0.75rem;
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+        }
+
+        .release-info {
+            flex: 1;
+        }
+
+        .release-info strong {
+            color: #667eea;
+        }
+
+        .releases-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .release-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .release-chip {
+            background: #eef2ff;
+            border: 1px solid #c7d2fe;
+            color: #3730a3;
+            padding: 0.15rem 0.5rem;
+            border-radius: 999px;
+            font-family: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            font-size: 0.8rem;
+            white-space: nowrap;
+        }
+
+        .config-loader {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            border-radius: 8px;
+            background: #f7f7fb;
+            border: 1px solid #e4e4ef;
+            color: #4b5563;
+        }
+
+        .config-loader .spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid #cbd5f5;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: config-spin 0.8s linear infinite;
+        }
+
+        .config-loader.done .spinner {
+            animation: none;
+            border-top-color: #cbd5f5;
+        }
+
+        .config-loader.status-ok {
+            background: #ecfdf5;
+            border-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .config-loader.status-warn {
+            background: #fff7ed;
+            border-color: #ffedd5;
+            color: #9a3412;
+        }
+
+        .user-display {
+            margin-top: 0.5rem;
+            font-size: 0.95rem;
+            color: #f3f4ff;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.25rem 0.6rem;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
+        }
+
+        .user-display span {
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        @keyframes config-spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .section-description {
+            color: #666;
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .data-management {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .info-box {
+            background: rgba(102, 126, 234, 0.05);
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .info-box p {
+            margin: 0 0 1rem 0;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .info-box ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .info-box li {
+            padding: 0.5rem 0;
+            color: #333;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .config-section h2 {
+            margin-top: 0;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="header-text">
+                    <h1>⚙️ Release Delivery Configuration</h1>
+                    <p class="subtitle">Manage release tracking settings and JQL templates</p>
+                    <div id="userInfo" class="user-info" hidden style="margin-top: 1rem; display: flex; align-items: center; gap: 1rem; justify-content: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1rem 2rem; border-radius: 12px; border: 2px solid rgba(255, 255, 255, 0.3); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);">
+                        <span style="font-weight: 700; color: #fff; font-size: 1rem;">You are connected to JIRA as:</span>
+                        <div class="user-avatar">
+                            <img id="userAvatar" src="" alt="User avatar" />
+                            <span id="userInitials" class="user-initials"></span>
+                        </div>
+                        <div class="user-details">
+                            <span id="userName" class="user-name"></span>
+                            <span id="userEmail" class="user-email"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <a href="release_delivery.html" class="btn btn-secondary">← Back to Release Delivery</a>
+                </div>
+            </div>
+        </header>
+
+        <main class="config-container">
+            <div id="successMessage" class="success-message"></div>
+
+            <!-- Configuration Loader -->
+            <section class="config-section" style="margin-bottom: 1.5rem;">
+                <div id="configLoader" class="config-loader">
+                    <div class="spinner" aria-hidden="true"></div>
+                    <div>
+                        <div id="configLoaderTitle" style="font-weight: 600;">Checking configuration...</div>
+                        <div id="configLoaderDetail" style="font-size: 0.9rem; color: #6b7280;">Loading configuration status.</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Projects Section -->
+            <section class="config-section">
+                <h3>JIRA Projects</h3>
+                <p style="color: #666; margin-bottom: 1rem;">
+                    Load all projects from JIRA and select which ones to memorize for quick access.
+                </p>
+                <button type="button" id="loadProjectsBtn" class="btn btn-primary">
+                    📋 Load Projects from JIRA
+                </button>
+                
+                <div id="projectsContainer" class="projects-container" style="display: none;">
+                    <div style="display: flex; gap: 0.5rem; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                        <div class="selected-count" id="selectedCount">0 projects selected</div>
+                        <div style="display:flex; gap:0.5rem; align-items:center;">
+                            <input id="projectFilterInput" type="search" placeholder="Filter projects by name or key..." style="padding:0.5rem; border-radius:6px; border:1px solid #ddd; width:280px;" />
+                            <button id="clearProjectFilterBtn" type="button" class="btn btn-secondary" title="Clear filter">✖</button>
+                        </div>
+                    </div>
+                    <div id="projectsList" class="projects-list"></div>
+                    <div class="projects-actions">
+                        <button type="button" id="selectAllProjectsBtn" class="btn btn-secondary">
+                            ✓ Select All
+                        </button>
+                        <button type="button" id="clearProjectsBtn" class="btn btn-secondary">
+                            ✗ Clear All
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Project Groups -->
+                <div style="margin-top:1.25rem; padding:1rem; border-radius:8px; background:#fff; border:1px solid #eee;">
+                    <h4 style="margin:0 0 0.5rem 0;">Project Groups</h4>
+                    <p style="margin:0 0 0.75rem 0; color:#666;">Create named groups of projects to organize saved selections.</p>
+                    <div style="display:flex; gap:0.5rem; align-items:center; margin-bottom:0.5rem; flex-wrap:wrap;">
+                        <input id="projectGroupNameInput" type="text" placeholder="Group name (e.g., Core Services)" style="flex:2; min-width:240px; padding:0.5rem; border:1px solid #ddd; border-radius:6px;" />
+                        <input id="projectGroupTeamSizeInput" type="number" min="1" step="1" placeholder="Team members" style="flex:1; min-width:160px; padding:0.5rem; border:1px solid #ddd; border-radius:6px;" />
+                        <button id="saveProjectGroupBtn" class="btn btn-primary" type="button">💾 Save Group</button>
+                        <button id="cancelProjectGroupEditBtn" class="btn btn-secondary" type="button" style="display:none;">✖ Cancel</button>
+                    </div>
+                    <div id="projectGroupsList" style="margin-top:0.5rem;"></div>
+                </div>
+            </section>
+
+            <!-- Releases Section -->
+            <section class="config-section">
+                <h3>JIRA Releases (Fix Versions)</h3>
+                <p style="color: #666; margin-bottom: 1rem;">
+                    Load fix versions from all your saved project groups.
+                </p>
+                <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 1rem;">
+                    <button type="button" id="loadAllReleasesBtn" class="btn btn-primary">
+                        📦 Load FixVersions from All Groups
+                    </button>
+                </div>
+                
+                <div id="releasesContainer" class="releases-container" style="display: none;">
+                    <div style="display: flex; gap: 0.5rem; align-items: center; justify-content: space-between;">
+                        <div class="selected-count" id="selectedReleasesCount">0 releases selected</div>
+                        <div style="display:flex; gap:0.5rem; align-items:center;">
+                            <input id="releaseFilterInput" type="search" placeholder="Filter releases by name..." style="padding:0.5rem; border-radius:6px; border:1px solid #ddd; width:260px;" />
+                            <button id="clearReleaseFilterBtn" type="button" class="btn btn-secondary" title="Clear filter">✖</button>
+                        </div>
+                    </div>
+                    <div id="releasesList" class="releases-list" style="margin-top:0.75rem;"></div>
+                    <div class="releases-actions">
+                        <button type="button" id="selectAllReleasesBtn" class="btn btn-secondary">
+                            ✓ Select All
+                        </button>
+                        <button type="button" id="clearReleasesBtn" class="btn btn-secondary">
+                            ✗ Clear All
+                        </button>
+                    </div>
+                </div>
+
+                
+
+                <!-- Release Groups -->
+                <div style="margin-top:1.25rem; padding:1rem; border-radius:8px; background:#fff; border:1px solid #eee;">
+                    <h4 style="margin:0 0 0.5rem 0;">Release Groups</h4>
+                    <p style="margin:0 0 0.75rem 0; color:#666;">Create named groups of releases (fixVersions) to organize saved selections.</p>
+                    <div style="display:flex; gap:0.5rem; align-items:center; margin-bottom:0.5rem; flex-wrap:wrap;">
+                        <input id="groupNameInput" type="text" placeholder="Group name (e.g., Release Candidates)" style="flex:1; min-width:220px; padding:0.5rem; border:1px solid #ddd; border-radius:6px;" />
+                        <input id="releaseListInput" type="text" placeholder="FixVersions (comma-separated)" style="flex:2; min-width:280px; padding:0.5rem; border:1px solid #ddd; border-radius:6px;" />
+                        <button id="saveGroupBtn" class="btn btn-primary" type="button">💾 Save Group</button>
+                        <button id="cancelGroupEditBtn" class="btn btn-secondary" type="button" style="display:none;">✖ Cancel</button>
+                    </div>
+                    <small style="color:#666; display:block; margin-top:0.25rem;">Tip: You can select releases above or paste a comma-separated list here.</small>
+                    <div id="releaseListPreview" class="release-preview"></div>
+                    <div id="groupsList" style="margin-top:0.5rem;"></div>
+                </div>
+
+            </section>
+
+            <!-- Throughput Ranges Section -->
+            <section class="config-section">
+                <h3>Throughput Ranges</h3>
+                
+                <!-- Throughput Ranges - Count -->
+                <div style="margin-bottom:2rem; padding:1.5rem; border-radius:8px; background:#f9f9f9; border:1px solid #eee;">
+                    <h4 style="margin:0 0 1rem 0;">Throughput Ranges - Issues (Count)</h4>
+                    <p style="margin:0 0 1rem 0; color:#666; font-size:0.9rem;">Define ranges and colors for throughput-count metric.</p>
+                    <div style="display:flex; gap:0.5rem; align-items:flex-end; margin-bottom:0.75rem; flex-wrap:wrap;">
+                        <div style="flex: 1; min-width:120px;">
+                            <label style="display:block; font-size:0.85rem; margin-bottom:0.3rem;">Min</label>
+                            <input id="countRangeMinInput" type="number" step="0.01" placeholder="Min value" style="padding:0.5rem; border:1px solid #ddd; border-radius:6px; width:100%; box-sizing:border-box;" />
+                        </div>
+                        <div style="flex: 1; min-width:120px;">
+                            <label style="display:block; font-size:0.85rem; margin-bottom:0.3rem;">Max</label>
+                            <input id="countRangeMaxInput" type="number" step="0.01" placeholder="Max value" style="padding:0.5rem; border:1px solid #ddd; border-radius:6px; width:100%; box-sizing:border-box;" />
+                        </div>
+                        <div style="flex: 1; min-width:120px;">
+                            <label style="display:block; font-size:0.85rem; margin-bottom:0.3rem;">Color</label>
+                            <input id="countRangeColorInput" type="color" value="#4CAF50" style="padding:0.3rem; border:1px solid #ddd; border-radius:6px; width:100%; height:2.5rem; box-sizing:border-box; cursor:pointer;" />
+                        </div>
+                        <button id="addCountRangeBtn" class="btn btn-primary" type="button" style="white-space:nowrap;">➕ Add Range</button>
+                    </div>
+                    <div id="countRangesList" style="margin-top:0.75rem;"></div>
+                </div>
+
+                <!-- Throughput Ranges - SP -->
+                <div style="margin-bottom:2rem; padding:1.5rem; border-radius:8px; background:#f9f9f9; border:1px solid #eee;">
+                    <h4 style="margin:0 0 1rem 0;">Throughput Ranges - Story Points (SP)</h4>
+                    <p style="margin:0 0 1rem 0; color:#666; font-size:0.9rem;">Define ranges and colors for throughput-SP metric.</p>
+                    <div style="display:flex; gap:0.5rem; align-items:flex-end; margin-bottom:0.75rem; flex-wrap:wrap;">
+                        <div style="flex: 1; min-width:120px;">
+                            <label style="display:block; font-size:0.85rem; margin-bottom:0.3rem;">Min</label>
+                            <input id="spRangeMinInput" type="number" step="0.01" placeholder="Min value" style="padding:0.5rem; border:1px solid #ddd; border-radius:6px; width:100%; box-sizing:border-box;" />
+                        </div>
+                        <div style="flex: 1; min-width:120px;">
+                            <label style="display:block; font-size:0.85rem; margin-bottom:0.3rem;">Max</label>
+                            <input id="spRangeMaxInput" type="number" step="0.01" placeholder="Max value" style="padding:0.5rem; border:1px solid #ddd; border-radius:6px; width:100%; box-sizing:border-box;" />
+                        </div>
+                        <div style="flex: 1; min-width:120px;">
+                            <label style="display:block; font-size:0.85rem; margin-bottom:0.3rem;">Color</label>
+                            <input id="spRangeColorInput" type="color" value="#2196F3" style="padding:0.3rem; border:1px solid #ddd; border-radius:6px; width:100%; height:2.5rem; box-sizing:border-box; cursor:pointer;" />
+                        </div>
+                        <button id="addSpRangeBtn" class="btn btn-primary" type="button" style="white-space:nowrap;">➕ Add Range</button>
+                    </div>
+                    <div id="spRangesList" style="margin-top:0.75rem;"></div>
+                </div>
+
+                <!-- Kick Ratio Ranges -->
+                <div style="margin-bottom:0; padding:1.5rem; border-radius:8px; background:#f9f9f9; border:1px solid #eee;">
+                    <h4 style="margin:0 0 1rem 0;">Kick Ratio Ranges (Percent)</h4>
+                    <p style="margin:0 0 1rem 0; color:#666; font-size:0.9rem;">Define ranges and colors for kick back ratio percentage.</p>
+                    <div style="display:flex; gap:0.5rem; align-items:flex-end; margin-bottom:0.75rem; flex-wrap:wrap;">
+                        <div style="flex: 1; min-width:120px;">
+                            <label style="display:block; font-size:0.85rem; margin-bottom:0.3rem;">Min %</label>
+                            <input id="kickRangeMinInput" type="number" min="0" max="100" step="1" placeholder="Min %" style="padding:0.5rem; border:1px solid #ddd; border-radius:6px; width:100%; box-sizing:border-box;" />
+                        </div>
+                        <div style="flex: 1; min-width:120px;">
+                            <label style="display:block; font-size:0.85rem; margin-bottom:0.3rem;">Max %</label>
+                            <input id="kickRangeMaxInput" type="number" min="0" max="100" step="1" placeholder="Max %" style="padding:0.5rem; border:1px solid #ddd; border-radius:6px; width:100%; box-sizing:border-box;" />
+                        </div>
+                        <div style="flex: 1; min-width:120px;">
+                            <label style="display:block; font-size:0.85rem; margin-bottom:0.3rem;">Color</label>
+                            <input id="kickRangeColorInput" type="color" value="#f59e0b" style="padding:0.3rem; border:1px solid #ddd; border-radius:6px; width:100%; height:2.5rem; box-sizing:border-box; cursor:pointer;" />
+                        </div>
+                        <button id="addKickRangeBtn" class="btn btn-primary" type="button" style="white-space:nowrap;">➕ Add Range</button>
+                    </div>
+                    <div id="kickRangesList" style="margin-top:0.75rem;"></div>
+                </div>
+
+            </section>
+
+            <!-- Data Management Section -->
+            <section class="config-section">
+                <h2>💾 Data Management</h2>
+                <p class="section-description">Manage your stored configuration and data</p>
+                
+                <div class="data-management">
+                    <div class="info-box">
+                        <p><strong>Current Storage:</strong></p>
+                        <ul id="storageInfo">
+                            <li>Loading...</li>
+                        </ul>
+                    </div>
+
+                    <div class="button-group">
+                        <button id="exportConfigBtn" class="btn btn-secondary" title="Export all configuration data to a JSON file">📥 Export Configuration</button>
+                        <button id="importConfigBtn" class="btn btn-secondary" title="Import configuration data from a JSON file">📤 Import Configuration</button>
+                        <input type="file" id="importFileInput" accept=".json" style="display: none;">
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 Jira Integration Tool. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script>
+        // Storage key for release delivery config
+        const PROJECTS_KEY = 'release_delivery_projects';
+        const PROJECT_GROUPS_KEY = 'release_delivery_projectGroups';
+        const RELEASES_KEY = 'release_delivery_releases';
+        const GROUPS_KEY = 'release_delivery_releaseGroups';
+        const COUNT_RANGES_KEY = 'release_delivery_countRanges';
+        const SP_RANGES_KEY = 'release_delivery_spRanges';
+        const KICK_RANGES_KEY = 'release_delivery_kickRanges';
+        let editingGroupIndex = null;
+        let editingProjectGroupIndex = null;
+        let releasesLoadPromise = null;
+
+        /**
+         * Display configuration status and user information
+         */
+        async function displayConfigurationStatus() {
+            const authType = localStorage.getItem('jira_authType');
+            const username = localStorage.getItem('jira_username');
+            const usertoken = localStorage.getItem('jira_usertoken');  // Alternative key for bearer token user
+            const bearerToken = localStorage.getItem('jira_bearerToken');
+            const jiraUrl = localStorage.getItem('jira_jiraUrl');
+            const proxyUrl = localStorage.getItem('jira_proxyUrl') || 'http://localhost:3000/api/jira';
+            
+            const statusHeaderEl = document.getElementById('configStatusHeader');
+            const statusCardEl = document.getElementById('configStatusCard');
+            const userTextEl = document.getElementById('userDisplayText');
+            const userStatusEl = document.getElementById('userDisplayStatus');
+            const loaderEl = document.getElementById('configLoader');
+            const loaderTitleEl = document.getElementById('configLoaderTitle');
+            const loaderDetailEl = document.getElementById('configLoaderDetail');
+
+            if (loaderEl) {
+                loaderEl.classList.remove('status-ok', 'status-warn', 'done');
+            }
+            if (loaderTitleEl) {
+                loaderTitleEl.textContent = 'Checking configuration...';
+            }
+            if (loaderDetailEl) {
+                loaderDetailEl.textContent = 'Loading configuration status.';
+            }
+            
+            // Log all jira_ keys in localStorage for debugging
+            console.log('📋 Configuration Status Check:');
+            console.log('📊 All localStorage keys with "jira_" prefix:');
+            Object.keys(localStorage).forEach(key => {
+                if (key.startsWith('jira_')) {
+                    const value = localStorage.getItem(key);
+                    const displayValue = value && value.length > 50 ? value.substring(0, 50) + '...' : value;
+                    console.log(`   ${key}: ${displayValue || '(empty)'}`);
+                }
+            });
+            
+            console.log('📋 Parsed Configuration:');
+            console.log(`   Auth Type: ${authType || '(not set)'}`);
+            console.log(`   Username: ${username || '(not set)'}`);
+            console.log(`   User Token: ${usertoken || '(not set)'}`);
+            console.log(`   JIRA URL: ${jiraUrl || '(not set)'}`);
+            console.log(`   Bearer Token set: ${!!bearerToken}`);
+            
+            if (!authType) {
+                const notConfiguredHtml = '⚠️ <strong>Not configured:</strong> Please complete <a href="setup.html" style="color: white; text-decoration: underline;">setup</a> first.';
+                if (statusHeaderEl) statusHeaderEl.innerHTML = notConfiguredHtml;
+                if (statusCardEl) statusCardEl.innerHTML = notConfiguredHtml;
+                if (userTextEl) userTextEl.textContent = 'Not configured';
+                if (userStatusEl) userStatusEl.textContent = 'Not configured';
+                if (loaderTitleEl) loaderTitleEl.textContent = 'Not configured';
+                if (loaderDetailEl) {
+                    loaderDetailEl.innerHTML = 'Please complete <a href="setup.html" style="color: inherit; text-decoration: underline;">setup</a> first.';
+                }
+                if (loaderEl) {
+                    loaderEl.classList.add('status-warn', 'done');
+                }
+                console.warn('❌ JIRA authentication not configured');
+                return false;
+            }
+            
+            const authLabel = authType === 'bearer' ? 'Bearer Token' : 'Basic Auth';
+            // For bearer auth, try to resolve the user via /myself
+            let userDisplay = (authType === 'bearer' ? (usertoken || username) : username) || 'Unknown user';
+            if (authType === 'bearer' && bearerToken) {
+                try {
+                    const response = await fetch(proxyUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${bearerToken}`
+                        },
+                        body: JSON.stringify({
+                            endpoint: '/myself',
+                            options: { method: 'GET' }
+                        })
+                    });
+
+                    if (response.ok) {
+                        const userData = await response.json();
+                        userDisplay = userData.displayName || userData.emailAddress || userData.name || userData.accountId || userDisplay;
+                    } else {
+                        console.warn('⚠️ Failed to fetch JIRA user from /myself:', response.status, response.statusText);
+                    }
+                } catch (error) {
+                    console.warn('⚠️ Error fetching JIRA user from /myself:', error);
+                }
+            }
+            let urlDisplay = 'Unknown server';
+            if (jiraUrl) {
+                try {
+                    urlDisplay = new URL(jiraUrl).hostname;
+                } catch (err) {
+                    console.warn('⚠️ Invalid JIRA URL in storage:', jiraUrl);
+                }
+            }
+            
+            const connectedHtml = `✅ <strong>Connected:</strong> ${authLabel} to ${urlDisplay}`;
+            if (statusHeaderEl) statusHeaderEl.innerHTML = connectedHtml;
+            if (statusCardEl) statusCardEl.innerHTML = connectedHtml;
+            if (userTextEl) userTextEl.textContent = userDisplay;
+            if (userStatusEl) userStatusEl.textContent = userDisplay;
+            if (loaderTitleEl) loaderTitleEl.textContent = 'Configuration connected';
+            if (loaderDetailEl) loaderDetailEl.textContent = `${authLabel} to ${urlDisplay}`;
+            if (loaderEl) loaderEl.classList.add('status-ok', 'done');
+            console.log(`✅ JIRA configuration found for user: ${userDisplay}`);
+            return true;
+        }
+
+        /**
+         * Display user information in header
+         */
+        async function displayUserInfo() {
+            try {
+                const proxyUrl = localStorage.getItem('jira_proxyUrl');
+                const authType = localStorage.getItem('jira_authType');
+                
+                if (!proxyUrl || !authType) {
+                    return; // Not configured yet
+                }
+
+                const headers = {
+                    'Content-Type': 'application/json'
+                };
+                
+                if (authType === 'basic') {
+                    const username = localStorage.getItem('jira_username');
+                    const apiToken = localStorage.getItem('jira_apiToken');
+                    if (username && apiToken) {
+                        headers['Authorization'] = 'Basic ' + btoa(`${username}:${apiToken}`);
+                    } else {
+                        return;
+                    }
+                } else if (authType === 'bearer') {
+                    const bearerToken = localStorage.getItem('jira_bearerToken');
+                    if (bearerToken) {
+                        headers['Authorization'] = `Bearer ${bearerToken}`;
+                    } else {
+                        return;
+                    }
+                } else {
+                    return;
+                }
+
+                const response = await fetch(proxyUrl, {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify({
+                        endpoint: '/myself',
+                        options: { method: 'GET' }
+                    })
+                });
+
+                if (response.ok) {
+                    const user = await response.json();
+                    showUserInfo(user);
+                }
+            } catch (error) {
+                // Silently fail - not critical
+                console.debug('Could not load user info:', error.message);
+            }
+        }
+
+        /**
+         * Show user information in the header
+         */
+        function showUserInfo(user) {
+            const userInfoDiv = document.getElementById('userInfo');
+            const userNameSpan = document.getElementById('userName');
+            const userEmailSpan = document.getElementById('userEmail');
+            const userAvatar = document.getElementById('userAvatar');
+            const userInitials = document.getElementById('userInitials');
+
+            // Set user name and email
+            const displayName = user.displayName || user.name || 'User';
+            if (userNameSpan) {
+                userNameSpan.textContent = displayName;
+            }
+            if (userEmailSpan) {
+                userEmailSpan.textContent = user.emailAddress || '';
+            }
+
+            // Set avatar or initials
+            if (userAvatar && userInitials) {
+                if (user.avatarUrls && user.avatarUrls['48x48']) {
+                    userAvatar.src = user.avatarUrls['48x48'];
+                    userAvatar.style.display = 'block';
+                    userInitials.style.display = 'none';
+                } else {
+                    // Generate initials from display name
+                    const initials = generateInitials(displayName);
+                    userInitials.textContent = initials;
+                    userAvatar.style.display = 'none';
+                    userInitials.style.display = 'flex';
+                }
+            }
+
+            // Show user info
+            if (userInfoDiv) {
+                userInfoDiv.hidden = false;
+            }
+        }
+
+        /**
+         * Generate initials from a name
+         */
+        function generateInitials(name) {
+            return name.split(' ')
+                .map(part => part[0])
+                .join('')
+                .toUpperCase()
+                .substring(0, 2);
+        }
+
+        // Load configuration on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 Release Delivery Configuration page loaded');
+            displayConfigurationStatus().catch(err => {
+                console.error('❌ displayConfigurationStatus failed:', err);
+            });
+            displayUserInfo().catch(err => {
+                console.debug('Could not display user info:', err.message);
+            });
+            
+            // Log all localStorage data for debugging
+            console.log('📦 All localStorage data:');
+            const allData = {};
+            Object.keys(localStorage).forEach(key => {
+                const value = localStorage.getItem(key);
+                const displayValue = value && value.length > 100 ? value.substring(0, 100) + '...' : value;
+                allData[key] = displayValue;
+                console.log(`   ${key}: ${displayValue || '(empty)'}`);
+            });
+            
+            displayProjectGroups();
+            displayReleaseGroups();
+            displayCountRanges();
+            displaySpRanges();
+            displayKickRanges();
+            setupEventListeners();
+            
+            console.log('📊 Loaded data summary:');
+            console.log(`   Project Groups: ${loadProjectGroups().length}`);
+            console.log(`   Release Groups: ${loadReleaseGroups().length}`);
+            console.log(`   Count Ranges: ${loadCountRanges().length}`);
+            console.log(`   SP Ranges: ${loadSpRanges().length}`);
+            console.log(`   Kick Ranges: ${loadKickRanges().length}`);
+            
+            // Show all loaded groups
+            const pg = loadProjectGroups();
+            if (pg.length > 0) {
+                console.log('📋 Project Groups Details:');
+                pg.forEach((g, idx) => {
+                    console.log(`   [${idx}] ${g.name}: ${g.projects.length} project(s), ${g.teamMembers || 0} team members`);
+                });
+            }
+        });
+
+        function setupEventListeners() {
+            // Projects management
+            document.getElementById('loadProjectsBtn').addEventListener('click', loadProjectsFromJira);
+            document.getElementById('selectAllProjectsBtn')?.addEventListener('click', selectAllProjects);
+            document.getElementById('clearProjectsBtn')?.addEventListener('click', clearAllProjects);
+            // Projects filter
+            document.getElementById('projectFilterInput')?.addEventListener('input', (e) => filterProjects(e.target.value));
+            document.getElementById('clearProjectFilterBtn')?.addEventListener('click', clearProjectFilter);
+
+            // Project groups
+            const saveBtn = document.getElementById('saveProjectGroupBtn');
+            if (saveBtn) {
+                console.log('✅ Save Project Group button found, attaching listener');
+                saveBtn.addEventListener('click', (e) => {
+                    console.log('🔔 Save Project Group button clicked');
+                    saveProjectGroup();
+                });
+            } else {
+                console.warn('❌ Save Project Group button NOT found');
+            }
+            
+            document.getElementById('cancelProjectGroupEditBtn')?.addEventListener('click', cancelProjectGroupEdit);
+
+            // Releases management
+            document.getElementById('loadAllReleasesBtn')?.addEventListener('click', loadReleasesFromAllProjectGroups);
+            document.getElementById('selectAllReleasesBtn')?.addEventListener('click', selectAllReleases);
+            document.getElementById('clearReleasesBtn')?.addEventListener('click', clearAllReleases);
+            // Releases filter
+            document.getElementById('releaseFilterInput')?.addEventListener('input', (e) => filterReleases(e.target.value));
+            document.getElementById('clearReleaseFilterBtn')?.addEventListener('click', clearReleaseFilter);
+
+            // Release groups
+            document.getElementById('saveGroupBtn')?.addEventListener('click', saveReleaseGroup);
+            document.getElementById('cancelGroupEditBtn')?.addEventListener('click', cancelReleaseGroupEdit);
+            document.getElementById('releaseListInput')?.addEventListener('input', updateReleaseListPreview);
+            // groups list actions are rendered dynamically
+
+            // Throughput ranges
+            document.getElementById('addCountRangeBtn')?.addEventListener('click', addCountRange);
+            document.getElementById('addSpRangeBtn')?.addEventListener('click', addSpRange);
+            document.getElementById('addKickRangeBtn')?.addEventListener('click', addKickRange);
+
+            // Data Management
+            document.getElementById('exportConfigBtn')?.addEventListener('click', exportConfiguration);
+            document.getElementById('importConfigBtn')?.addEventListener('click', importConfiguration);
+            document.getElementById('importFileInput')?.addEventListener('change', handleImportFile);
+
+            // Update storage info on page load
+            updateStorageInfo();
+        }
+
+        function showSuccessMessage(message) {
+            const messageEl = document.getElementById('successMessage');
+            messageEl.textContent = message;
+            messageEl.classList.add('show');
+            
+            setTimeout(() => {
+                messageEl.classList.remove('show');
+            }, 3000);
+        }
+
+        function showErrorMessage(message) {
+            let messageEl = document.getElementById('errorMessage');
+            if (!messageEl) {
+                messageEl = document.createElement('div');
+                messageEl.id = 'errorMessage';
+                messageEl.className = 'status-message error';
+                const container = document.querySelector('.config-container') || document.body;
+                container.insertBefore(messageEl, container.firstChild);
+            }
+            messageEl.textContent = message;
+            messageEl.style.display = 'block';
+            setTimeout(() => { messageEl.style.display = 'none'; }, 5000);
+        }
+
+        /**
+         * Update storage info display
+         */
+        function updateStorageInfo() {
+            const storageInfoElement = document.getElementById('storageInfo');
+            if (!storageInfoElement) {
+                return;
+            }
+
+            const projectGroups = JSON.parse(localStorage.getItem(PROJECT_GROUPS_KEY) || '[]');
+            const releaseGroups = JSON.parse(localStorage.getItem(GROUPS_KEY) || '[]');
+            const countRanges = JSON.parse(localStorage.getItem(COUNT_RANGES_KEY) || '[]');
+            const spRanges = JSON.parse(localStorage.getItem(SP_RANGES_KEY) || '[]');
+            const kickRanges = JSON.parse(localStorage.getItem(KICK_RANGES_KEY) || '[]');
+            const connectionUrl = localStorage.getItem('jira_proxyUrl');
+            const connectionStatus = connectionUrl ? 'Configured' : 'Not Configured';
+            
+            storageInfoElement.innerHTML = `
+                <li>Project groups: <strong>${projectGroups.length}</strong></li>
+                <li>Release groups: <strong>${releaseGroups.length}</strong></li>
+                <li>Count ranges: <strong>${countRanges.length}</strong></li>
+                <li>Story point ranges: <strong>${spRanges.length}</strong></li>
+                <li>Kick-back ratio ranges: <strong>${kickRanges.length}</strong></li>
+                <li>Connection settings: <strong>${connectionStatus}</strong></li>
+                <li>Storage type: <strong>localStorage</strong></li>
+            `;
+        }
+
+        /**
+         * Export configuration to JSON file
+         */
+        function exportConfiguration() {
+            try {
+                const config = {
+                    version: '1.0',
+                    exportDate: new Date().toISOString(),
+                    projects: JSON.parse(localStorage.getItem(PROJECTS_KEY) || '[]'),
+                    projectGroups: JSON.parse(localStorage.getItem(PROJECT_GROUPS_KEY) || '[]'),
+                    releases: JSON.parse(localStorage.getItem(RELEASES_KEY) || '[]'),
+                    releaseGroups: JSON.parse(localStorage.getItem(GROUPS_KEY) || '[]'),
+                    countRanges: JSON.parse(localStorage.getItem(COUNT_RANGES_KEY) || '[]'),
+                    spRanges: JSON.parse(localStorage.getItem(SP_RANGES_KEY) || '[]'),
+                    kickRanges: JSON.parse(localStorage.getItem(KICK_RANGES_KEY) || '[]')
+                };
+
+                const dataStr = JSON.stringify(config, null, 2);
+                const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(dataBlob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `release-delivery-config-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+
+                showSuccessMessage('✅ Configuration exported successfully');
+                console.log('✅ Configuration exported', config);
+            } catch (error) {
+                console.error('❌ Export error:', error);
+                showErrorMessage(`Export failed: ${error.message}`);
+            }
+        }
+
+        /**
+         * Trigger file input for import
+         */
+        function importConfiguration() {
+            document.getElementById('importFileInput').click();
+        }
+
+        /**
+         * Handle imported configuration file
+         */
+        async function handleImportFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            try {
+                const text = await file.text();
+                const importedConfig = JSON.parse(text);
+
+                // Validate import data
+                if (!importedConfig.version) {
+                    throw new Error('Invalid file format: missing version field');
+                }
+
+                // Ask user if they want to merge or replace
+                const currentCount = JSON.parse(localStorage.getItem(PROJECT_GROUPS_KEY) || '[]').length;
+                let action = 'replace';
+                
+                if (currentCount > 0) {
+                    const userChoice = confirm(
+                        `You have existing configuration.\n\n` +
+                        `Click OK to REPLACE all existing configuration.\n` +
+                        `Click Cancel to MERGE with existing configuration.`
+                    );
+                    action = userChoice ? 'replace' : 'merge';
+                }
+
+                if (action === 'replace') {
+                    // Replace all data
+                    localStorage.setItem(PROJECTS_KEY, JSON.stringify(importedConfig.projects || []));
+                    localStorage.setItem(PROJECT_GROUPS_KEY, JSON.stringify(importedConfig.projectGroups || []));
+                    localStorage.setItem(RELEASES_KEY, JSON.stringify(importedConfig.releases || []));
+                    localStorage.setItem(GROUPS_KEY, JSON.stringify(importedConfig.releaseGroups || []));
+                    localStorage.setItem(COUNT_RANGES_KEY, JSON.stringify(importedConfig.countRanges || []));
+                    localStorage.setItem(SP_RANGES_KEY, JSON.stringify(importedConfig.spRanges || []));
+                    localStorage.setItem(KICK_RANGES_KEY, JSON.stringify(importedConfig.kickRanges || []));
+                } else {
+                    // Merge with existing data (imported takes precedence)
+                    const mergeArray = (key, importedData) => {
+                        const existing = JSON.parse(localStorage.getItem(key) || '[]');
+                        const merged = [...existing];
+                        if (Array.isArray(importedData)) {
+                            importedData.forEach(item => {
+                                if (!merged.some(m => JSON.stringify(m) === JSON.stringify(item))) {
+                                    merged.push(item);
+                                }
+                            });
+                        }
+                        localStorage.setItem(key, JSON.stringify(merged));
+                    };
+                    
+                    mergeArray(PROJECTS_KEY, importedConfig.projects);
+                    mergeArray(PROJECT_GROUPS_KEY, importedConfig.projectGroups);
+                    mergeArray(RELEASES_KEY, importedConfig.releases);
+                    mergeArray(GROUPS_KEY, importedConfig.releaseGroups);
+                    mergeArray(COUNT_RANGES_KEY, importedConfig.countRanges);
+                    mergeArray(SP_RANGES_KEY, importedConfig.spRanges);
+                    mergeArray(KICK_RANGES_KEY, importedConfig.kickRanges);
+                }
+
+                updateStorageInfo();
+                showSuccessMessage(`✅ Configuration imported (${action})`);
+                console.log(`✅ Configuration imported (${action})`, importedConfig);
+                
+                // Reload page to reflect changes
+                setTimeout(() => location.reload(), 1500);
+
+            } catch (error) {
+                console.error('❌ Import error:', error);
+                showErrorMessage(`Import failed: ${error.message}`);
+            }
+
+            // Reset file input
+            event.target.value = '';
+        }
+
+        // Projects Management Functions
+        async function loadProjectsFromJira() {
+            const btn = document.getElementById('loadProjectsBtn');
+            const container = document.getElementById('projectsContainer');
+            const projectsList = document.getElementById('projectsList');
+            const originalText = btn.textContent;
+            
+            try {
+                btn.textContent = '⏳ Loading...';
+                btn.disabled = true;
+
+                // Get auth from main jira_ storage (shared connection)
+                const authType = localStorage.getItem('jira_authType');
+                const username = localStorage.getItem('jira_username');
+                const apiToken = localStorage.getItem('jira_apiToken');
+                const bearerToken = localStorage.getItem('jira_bearerToken');
+                const proxyUrl = localStorage.getItem('jira_proxyUrl') || 'http://localhost:3000/api/jira';
+
+                if (!authType) {
+                    throw new Error('Please configure JIRA connection first');
+                }
+
+                const headers = {
+                    'Content-Type': 'application/json'
+                };
+                
+                if (authType === 'basic') {
+                    if (username && apiToken) {
+                        headers['Authorization'] = 'Basic ' + btoa(`${username}:${apiToken}`);
+                    }
+                } else if (authType === 'bearer') {
+                    if (bearerToken) {
+                        headers['Authorization'] = `Bearer ${bearerToken}`;
+                    }
+                }
+
+                const response = await fetch(proxyUrl, {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify({
+                        endpoint: '/project',
+                        options: { method: 'GET' }
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error('Failed to load projects: ' + errorText);
+                }
+
+                const data = await response.json();
+                console.log('Projects API response:', data);
+
+                let projects = [];
+                if (Array.isArray(data)) {
+                    projects = data;
+                } else if (data.values && Array.isArray(data.values)) {
+                    projects = data.values;
+                } else if (data.projects && Array.isArray(data.projects)) {
+                    projects = data.projects;
+                }
+
+                if (projects.length === 0) {
+                    throw new Error('No projects found');
+                }
+
+                // Sort projects by key
+                projects.sort((a, b) => (a.key || '').localeCompare(b.key || ''));
+
+                // Display projects with checkboxes
+                projectsList.innerHTML = projects.map(project => {
+                    const key = project.key || '';
+                    const name = project.name || key;
+                    
+                    return `
+                        <label class="project-checkbox-label">
+                            <input 
+                                type="checkbox" 
+                                class="project-checkbox" 
+                                value="${escapeHtml(key)}"
+                                data-name="${escapeHtml(name)}"
+                            >
+                            <span class="project-info">
+                                <strong>${escapeHtml(key)}</strong> - ${escapeHtml(name)}
+                            </span>
+                        </label>
+                    `;
+                }).join('');
+
+                container.style.display = 'block';
+                const filterInput = document.getElementById('projectFilterInput');
+                if (filterInput) {
+                    filterInput.value = '';
+                }
+                attachProjectCheckboxHandlers();
+                reorderProjectsList();
+                updateSelectedCount();
+                showSuccessMessage(`Loaded ${projects.length} projects from JIRA`);
+
+            } catch (error) {
+                console.error('Error loading projects:', error);
+                showErrorMessage('Error loading projects: ' + error.message);
+            } finally {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        function selectAllProjects() {
+            document.querySelectorAll('.project-checkbox').forEach(cb => cb.checked = true);
+            updateSelectedCount();
+        }
+
+        function clearAllProjects() {
+            document.querySelectorAll('.project-checkbox').forEach(cb => cb.checked = false);
+            updateSelectedCount();
+        }
+
+        function updateSelectedCount() {
+            const count = document.querySelectorAll('.project-checkbox:checked').length;
+            const countEl = document.getElementById('selectedCount');
+            if (countEl) {
+                countEl.textContent = `${count} project${count !== 1 ? 's' : ''} selected`;
+            }
+        }
+
+        function filterProjects(filterText) {
+            const term = (filterText || '').toLowerCase().trim();
+            const labels = document.querySelectorAll('.project-checkbox-label');
+            labels.forEach(label => {
+                const text = label.textContent.trim().toLowerCase();
+                if (!term || text.includes(term)) {
+                    label.style.display = '';
+                } else {
+                    label.style.display = 'none';
+                }
+            });
+        }
+
+        function clearProjectFilter() {
+            const input = document.getElementById('projectFilterInput');
+            if (input) input.value = '';
+            filterProjects('');
+        }
+
+        function reorderProjectsList() {
+            const list = document.getElementById('projectsList');
+            if (!list) return;
+            const labels = Array.from(list.querySelectorAll('.project-checkbox-label'));
+            if (labels.length === 0) return;
+
+            const extractKey = (label) => {
+                const strong = label.querySelector('.project-info strong');
+                return strong ? strong.textContent.trim().toUpperCase() : label.textContent.trim().toUpperCase();
+            };
+
+            const selected = labels.filter(l => l.querySelector('.project-checkbox')?.checked).sort((a, b) => extractKey(a).localeCompare(extractKey(b)));
+            const notSelected = labels.filter(l => !l.querySelector('.project-checkbox')?.checked).sort((a, b) => extractKey(a).localeCompare(extractKey(b)));
+
+            // Append selected first, then notSelected
+            list.innerHTML = '';
+            selected.concat(notSelected).forEach(l => list.appendChild(l));
+        }
+
+        function attachProjectCheckboxHandlers() {
+            document.querySelectorAll('.project-checkbox').forEach(cb => {
+                cb.removeEventListener('change', projectCheckboxHandler);
+                cb.addEventListener('change', projectCheckboxHandler);
+            });
+        }
+
+        function projectCheckboxHandler(e) {
+            // When selection changes, reorder list and update count
+            reorderProjectsList();
+            updateSelectedCount();
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Project Groups Management
+        function loadProjectGroups() {
+            try {
+                const key = PROJECT_GROUPS_KEY;
+                const stored = localStorage.getItem(key);
+                const parsed = JSON.parse(stored || '[]');
+                console.log(`📖 loadProjectGroups: key="${key}", stored="${stored ? stored.substring(0, 50) + '...' : 'null'}", parsed count=${parsed.length}`);
+                return parsed;
+            } catch (err) {
+                console.error('❌ Error loading project groups:', err);
+                return [];
+            }
+        }
+
+        function saveProjectGroup() {
+            console.log('🔄 saveProjectGroup called');
+            
+            const nameInput = document.getElementById('projectGroupNameInput');
+            const teamSizeInput = document.getElementById('projectGroupTeamSizeInput');
+            const name = (nameInput?.value || '').trim();
+            const teamSizeRaw = (teamSizeInput?.value || '').trim();
+            
+            console.log(`   Input name: "${name}"`);
+            console.log(`   Input teamSize: "${teamSizeRaw}"`);
+            
+            let teamMembers = null;
+            if (!name) {
+                showErrorMessage('Please enter a group name');
+                console.warn('❌ No name provided');
+                return;
+            }
+
+            if (teamSizeRaw) {
+                const parsed = parseInt(teamSizeRaw, 10);
+                if (!Number.isFinite(parsed) || parsed < 1) {
+                    showErrorMessage('Please enter a valid number of team members');
+                    console.warn('❌ Invalid team size');
+                    return;
+                }
+                teamMembers = parsed;
+            }
+
+            // Determine selected projects
+            const checkboxes = document.querySelectorAll('.project-checkbox:checked');
+            console.log(`   Found ${checkboxes.length} selected project checkboxes`);
+            
+            const selected = Array.from(checkboxes).map(cb => ({
+                key: cb.value,
+                name: cb.dataset.name
+            }));
+            
+            if (selected.length === 0) {
+                showErrorMessage('Please select at least one project to add to the group');
+                console.warn('❌ No projects selected');
+                return;
+            }
+
+            console.log(`✅ Validation passed: name="${name}", projects=${selected.length}, teamMembers=${teamMembers}`);
+
+            const groups = loadProjectGroups();
+            if (editingProjectGroupIndex !== null && groups[editingProjectGroupIndex]) {
+                // Update existing group
+                groups[editingProjectGroupIndex].name = name;
+                groups[editingProjectGroupIndex].projects = selected;
+                groups[editingProjectGroupIndex].teamMembers = teamMembers;
+                groups[editingProjectGroupIndex].updatedAt = new Date().toISOString();
+                showSuccessMessage(`Updated group '${name}' (${selected.length} project(s))`);
+                console.log(`✏️ Updated project group: ${name}`);
+            } else {
+                groups.push({ name, projects: selected, teamMembers, createdAt: new Date().toISOString() });
+                showSuccessMessage(`Saved group '${name}' with ${selected.length} project(s)`);
+                console.log(`💾 Saved new project group: ${name} with ${selected.length} projects`);
+            }
+
+            console.log(`📝 Saving to localStorage key: ${PROJECT_GROUPS_KEY}`);
+            console.log(`📊 Total groups after save: ${groups.length}`);
+            
+            try {
+                const jsonStr = JSON.stringify(groups);
+                console.log(`💾 JSON stringify successful, length: ${jsonStr.length} chars`);
+                localStorage.setItem(PROJECT_GROUPS_KEY, jsonStr);
+                console.log(`✅ Project groups saved to localStorage`);
+            } catch (err) {
+                console.error('❌ Error saving to localStorage:', err);
+                showErrorMessage(`Error saving groups: ${err.message}`);
+                return;
+            }
+            
+            try {
+                const retrieved = loadProjectGroups();
+                console.log(`🔍 Verification - Retrieved from localStorage:`, retrieved);
+                console.log(`   Count: ${retrieved.length}`);
+                if (retrieved.length > 0) {
+                    console.log(`   First group: ${retrieved[0].name}`);
+                }
+            } catch (err) {
+                console.error('❌ Error verifying save:', err);
+            }
+            
+            nameInput.value = '';
+            if (teamSizeInput) teamSizeInput.value = '';
+            // reset edit state
+            editingProjectGroupIndex = null;
+            document.getElementById('saveProjectGroupBtn').textContent = '💾 Save Group';
+            const cancelBtn = document.getElementById('cancelProjectGroupEditBtn');
+            if (cancelBtn) cancelBtn.style.display = 'none';
+            displayProjectGroups();
+            // Clear the project list checkboxes
+            document.querySelectorAll('.project-checkbox').forEach(cb => cb.checked = false);
+            reorderProjectsList();
+            updateSelectedCount();
+            updateStorageInfo();
+        }
+
+        function displayProjectGroups() {
+            const groups = loadProjectGroups();
+            const container = document.getElementById('projectGroupsList');
+            
+            console.log(`🔍 displayProjectGroups called`);
+            console.log(`   Container found: ${!!container}`);
+            console.log(`   Storage key: ${PROJECT_GROUPS_KEY}`);
+            console.log(`   Groups loaded: ${groups.length}`);
+            console.log(`   Groups data:`, groups);
+            
+            if (!container) {
+                console.warn('❌ Container not found');
+                return;
+            }
+
+            if (groups.length === 0) {
+                container.innerHTML = '<div style="color:#666;">No groups defined yet.</div>';
+                console.log('ℹ️ No groups to display');
+                return;
+            }
+
+            // Sort groups alphabetically by name
+            const sortedGroups = groups.slice().sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+
+            container.innerHTML = sortedGroups.map((g, displayIdx) => {
+                // Find the original index in the unsorted array
+                const originalIdx = groups.findIndex(group => group.name === g.name && JSON.stringify(group.projects) === JSON.stringify(g.projects));
+                const teamLabel = Number.isFinite(g.teamMembers)
+                    ? `${g.teamMembers} team member${g.teamMembers !== 1 ? 's' : ''}`
+                    : 'Team members not set';
+                // Create project details list
+                const projectDetails = g.projects.map(p => `${escapeHtml(p.key)} - ${escapeHtml(p.name)}`).join('<br>');
+                return `
+                <div style="display:flex; align-items:flex-start; justify-content:space-between; padding:0.5rem 0; border-bottom:1px dashed #eee;">
+                    <div style="flex:1">
+                        <strong>${escapeHtml(g.name)}</strong>
+                        <div style="font-size:0.85rem; color:#666; margin-top:0.4rem; line-height:1.4;">${projectDetails}</div>
+                        <div style="font-size:0.85rem; color:#888; margin-top:0.3rem;">${escapeHtml(teamLabel)}</div>
+                    </div>
+                    <div style="display:flex; gap:0.5rem; margin-left:1rem;">
+                        <button class="btn btn-secondary" onclick="editProjectGroup(${originalIdx})">Edit</button>
+                        <button class="btn btn-secondary" onclick="previewProjectGroup(${originalIdx})">Preview</button>
+                        <button class="btn btn-danger" onclick="deleteProjectGroup(${originalIdx})">Delete</button>
+                    </div>
+                </div>
+            `;
+            }).join('');
+
+            console.log(`✅ Displayed ${sortedGroups.length} project groups`);
+
+
+        }
+
+        function deleteProjectGroup(index) {
+            const groups = loadProjectGroups();
+            if (!groups[index]) return;
+            if (!confirm(`Delete group '${groups[index].name}'?`)) return;
+            groups.splice(index, 1);
+            localStorage.setItem(PROJECT_GROUPS_KEY, JSON.stringify(groups));
+            displayProjectGroups();
+            showSuccessMessage('Group deleted');
+        }
+
+        function previewProjectGroup(index) {
+            const groups = loadProjectGroups();
+            const group = groups[index];
+            if (!group) return;
+            const projectList = group.projects.map(p => `${p.key} - ${p.name}`).join('\n');
+            const teamLine = Number.isFinite(group.teamMembers)
+                ? `Team members: ${group.teamMembers}\n\n`
+                : '';
+            showSuccessMessage(`Group '${group.name}' contains:\n\n${teamLine}${projectList}`);
+        }
+
+        function projectsLoaded() {
+            const projectsList = document.getElementById('projectsList');
+            return !!projectsList && projectsList.querySelectorAll('.project-checkbox').length > 0;
+        }
+
+        async function editProjectGroup(index) {
+            const groups = loadProjectGroups();
+            const group = groups[index];
+            if (!group) return;
+
+            if (!projectsLoaded()) {
+                await loadProjectsFromJira();
+            }
+
+            if (!projectsLoaded()) {
+                showErrorMessage('Projects are not loaded yet. Please load projects and try again.');
+                return;
+            }
+
+            editingProjectGroupIndex = index;
+            const nameInput = document.getElementById('projectGroupNameInput');
+            const teamSizeInput = document.getElementById('projectGroupTeamSizeInput');
+            nameInput.value = group.name;
+            if (teamSizeInput) {
+                teamSizeInput.value = Number.isFinite(group.teamMembers) ? group.teamMembers : '';
+            }
+
+            // Ensure projects list is visible and check appropriate checkboxes
+            const container = document.getElementById('projectsContainer');
+            if (container) container.style.display = 'block';
+
+            // Uncheck all then check group projects
+            const checkboxes = document.querySelectorAll('.project-checkbox');
+            const projectSet = new Set(group.projects.map(p => p.key.toLowerCase()));
+            checkboxes.forEach(cb => {
+                const val = (cb.value || '').toLowerCase();
+                cb.checked = projectSet.has(val);
+            });
+
+            // Attach handlers, reorder and update UI
+            attachProjectCheckboxHandlers();
+            reorderProjectsList();
+            updateSelectedCount();
+
+            // Toggle Save/Cancel UI
+            const saveBtn = document.getElementById('saveProjectGroupBtn');
+            if (saveBtn) saveBtn.textContent = 'Update Group';
+            const cancelBtn = document.getElementById('cancelProjectGroupEditBtn');
+            if (cancelBtn) cancelBtn.style.display = '';
+            // Scroll groups area into view
+            document.getElementById('projectGroupsList')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function cancelProjectGroupEdit() {
+            editingProjectGroupIndex = null;
+            const nameInput = document.getElementById('projectGroupNameInput');
+            if (nameInput) nameInput.value = '';
+            const teamSizeInput = document.getElementById('projectGroupTeamSizeInput');
+            if (teamSizeInput) teamSizeInput.value = '';
+            const saveBtn = document.getElementById('saveProjectGroupBtn');
+            if (saveBtn) saveBtn.textContent = '💾 Save Group';
+            const cancelBtn = document.getElementById('cancelProjectGroupEditBtn');
+            if (cancelBtn) cancelBtn.style.display = 'none';
+            // Optionally uncheck all projects
+            document.querySelectorAll('.project-checkbox').forEach(cb => cb.checked = false);
+            reorderProjectsList();
+            updateSelectedCount();
+        }
+
+        // Releases Management Functions
+        async function loadReleasesFromAllProjectGroups() {
+            if (releasesLoadPromise) {
+                return releasesLoadPromise;
+            }
+
+            releasesLoadPromise = (async () => {
+                const btn = document.getElementById('loadAllReleasesBtn');
+                const container = document.getElementById('releasesContainer');
+                const releasesList = document.getElementById('releasesList');
+                const filterInput = document.getElementById('releaseFilterInput');
+                const originalText = btn?.textContent || '';
+
+                try {
+                    if (btn) {
+                        btn.textContent = '⏳ Loading...';
+                        btn.disabled = true;
+                    }
+                    if (filterInput) {
+                        filterInput.value = '';
+                    }
+
+                    // Get auth from main jira_ storage (shared connection)
+                    const authType = localStorage.getItem('jira_authType');
+                    const username = localStorage.getItem('jira_username');
+                    const apiToken = localStorage.getItem('jira_apiToken');
+                    const bearerToken = localStorage.getItem('jira_bearerToken');
+                    const proxyUrl = localStorage.getItem('jira_proxyUrl') || 'http://localhost:3000/api/jira';
+
+                    if (!authType) {
+                        throw new Error('Please configure JIRA connection first');
+                    }
+
+                    const headers = {
+                        'Content-Type': 'application/json'
+                    };
+
+                    if (authType === 'basic') {
+                        if (username && apiToken) {
+                            headers['Authorization'] = 'Basic ' + btoa(`${username}:${apiToken}`);
+                        }
+                    } else if (authType === 'bearer') {
+                        if (bearerToken) {
+                            headers['Authorization'] = `Bearer ${bearerToken}`;
+                        }
+                    }
+
+                    const projectGroups = loadProjectGroups();
+                    if (!projectGroups || projectGroups.length === 0) {
+                        throw new Error('No saved project groups found');
+                    }
+
+                    const projectMap = new Map();
+                    projectGroups.forEach(group => {
+                        (group.projects || []).forEach(project => {
+                            if (project?.key) {
+                                projectMap.set(project.key, project);
+                            }
+                        });
+                    });
+
+                    const projects = Array.from(projectMap.values());
+                    if (projects.length === 0) {
+                        throw new Error('Saved project groups contain no projects');
+                    }
+
+                    // Calculate date from 1 year ago
+                    const oneYearAgo = new Date();
+                    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+
+                    // Collect all unique fix versions from all projects created in the last year
+                    const allReleases = new Map();
+
+                    for (const project of projects) {
+                        try {
+                            const versionResponse = await fetch(proxyUrl, {
+                                method: 'POST',
+                                headers: headers,
+                                body: JSON.stringify({
+                                    endpoint: `/project/${project.key}/versions`,
+                                    options: { method: 'GET' }
+                                })
+                            });
+
+                            if (versionResponse.ok) {
+                                const versionData = await versionResponse.json();
+                                let versions = [];
+
+                                if (Array.isArray(versionData)) {
+                                    versions = versionData;
+                                } else if (versionData.values && Array.isArray(versionData.values)) {
+                                    versions = versionData.values;
+                                }
+
+                                versions.forEach(version => {
+                                    if (version.name && !allReleases.has(version.name)) {
+                                        let isWithinLastYear = true;
+                                        if (version.created || version.startDate) {
+                                            const versionDate = new Date(version.created || version.startDate);
+                                            isWithinLastYear = versionDate >= oneYearAgo;
+                                        }
+
+                                        if (isWithinLastYear) {
+                                            allReleases.set(version.name, {
+                                                name: version.name,
+                                                id: version.id,
+                                                released: version.released || false,
+                                                created: version.created || version.startDate
+                                            });
+                                        }
+                                    }
+                                });
+                            }
+                        } catch (error) {
+                            console.warn(`Could not load versions for project ${project.key}:`, error);
+                        }
+                    }
+
+                    if (allReleases.size === 0) {
+                        throw new Error('No releases found in saved project groups created in the last year');
+                    }
+
+                    const releaseArray = Array.from(allReleases.values());
+                    releaseArray.sort((a, b) => b.name.localeCompare(a.name));
+
+                    releasesList.innerHTML = releaseArray.map(release => {
+                        const releasedBadge = release.released ? '<span style="font-size: 0.75rem; background: #10b981; color: white; padding: 0.2rem 0.5rem; border-radius: 4px; margin-left: 0.5rem;">Released</span>' : '';
+
+                        return `
+                        <label class="release-checkbox-label">
+                            <input 
+                                type="checkbox" 
+                                class="release-checkbox" 
+                                value="${escapeHtml(release.name)}"
+                                data-id="${release.id || ''}"
+                                data-released="${release.released}"
+                                onchange="updateSelectedReleasesCount()"
+                            >
+                            <span class="release-info">
+                                <strong>${escapeHtml(release.name)}</strong>
+                                ${releasedBadge}
+                            </span>
+                        </label>
+                    `;
+                    }).join('');
+
+                    attachReleaseCheckboxHandlers();
+                    container.style.display = 'block';
+                    filterReleases('');
+                    updateSelectedReleasesCount();
+                    showSuccessMessage(`Loaded ${releaseArray.length} unique releases from all saved project groups`);
+                    return releaseArray.length;
+
+                } catch (error) {
+                    console.error('Error loading releases from all project groups:', error);
+                    showErrorMessage('Error loading releases: ' + error.message);
+                    return 0;
+                } finally {
+                    if (btn) {
+                        btn.textContent = originalText;
+                        btn.disabled = false;
+                    }
+                }
+            })();
+
+            try {
+                return await releasesLoadPromise;
+            } finally {
+                releasesLoadPromise = null;
+            }
+        }
+
+        // Note: 'Save Selected Releases' removed in favor of Release Groups.
+
+        function selectAllReleases() {
+            // Select only visible releases (respecting the current filter)
+            document.querySelectorAll('.release-checkbox').forEach(cb => {
+                const label = cb.closest('.release-checkbox-label');
+                if (!label) return;
+                const visible = label.offsetParent !== null && window.getComputedStyle(label).display !== 'none';
+                if (visible) cb.checked = true;
+            });
+            // Reorder so checked items appear at top
+            reorderReleasesList();
+            // Reorder so checked items appear at top
+            reorderReleasesList();
+            updateSelectedReleasesCount();
+        }
+
+        function clearAllReleases() {
+            document.querySelectorAll('.release-checkbox').forEach(cb => cb.checked = false);
+            updateSelectedReleasesCount();
+        }
+
+        // Filter releases list by provided text (case-insensitive)
+        // NOTE: do not clear any existing selections when filtering
+        function filterReleases(filterText) {
+            const term = (filterText || '').toLowerCase().trim();
+            const labels = document.querySelectorAll('.release-checkbox-label');
+            labels.forEach(label => {
+                const text = label.textContent.trim().toLowerCase();
+                if (!term || text.includes(term)) {
+                    label.style.display = '';
+                } else {
+                    label.style.display = 'none';
+                    // keep any previously checked state intact
+                }
+            });
+            // Reorder to keep selected releases at top (even if hidden they'll remain checked)
+            reorderReleasesList();
+            updateSelectedReleasesCount();
+        }
+
+        function clearReleaseFilter() {
+            const input = document.getElementById('releaseFilterInput');
+            if (input) input.value = '';
+            filterReleases('');
+        }
+
+        // Reorder releases: move selected releases to top, sort alphabetically
+        function reorderReleasesList() {
+            const list = document.getElementById('releasesList');
+            if (!list) return;
+            const labels = Array.from(list.querySelectorAll('.release-checkbox-label'));
+            if (labels.length === 0) return;
+
+            const extractName = (label) => {
+                const strong = label.querySelector('.release-info strong');
+                return strong ? strong.textContent.trim().toLowerCase() : label.textContent.trim().toLowerCase();
+            };
+
+            const selected = labels.filter(l => l.querySelector('.release-checkbox')?.checked).sort((a,b)=> extractName(a).localeCompare(extractName(b)));
+            const notSelected = labels.filter(l => !l.querySelector('.release-checkbox')?.checked).sort((a,b)=> extractName(a).localeCompare(extractName(b)));
+
+            // Append selected first, then notSelected
+            list.innerHTML = '';
+            selected.concat(notSelected).forEach(l => list.appendChild(l));
+        }
+
+        function attachReleaseCheckboxHandlers() {
+            document.querySelectorAll('.release-checkbox').forEach(cb => {
+                cb.removeEventListener('change', releaseCheckboxHandler);
+                cb.addEventListener('change', releaseCheckboxHandler);
+            });
+        }
+
+        function releaseCheckboxHandler(e) {
+            // When selection changes, reorder list and update count
+            reorderReleasesList();
+            updateSelectedReleasesCount();
+        }
+
+        function updateSelectedReleasesCount() {
+            const count = document.querySelectorAll('.release-checkbox:checked').length;
+            const countEl = document.getElementById('selectedReleasesCount');
+            if (countEl) {
+                countEl.textContent = `${count} release${count !== 1 ? 's' : ''} selected`;
+            }
+        }
+
+        // Previously there was a 'Currently Saved Releases' display here; removed.
+
+        // Release Groups Management
+        function loadReleaseGroups() {
+            return JSON.parse(localStorage.getItem(GROUPS_KEY) || '[]');
+        }
+
+        function updateReleaseListPreview() {
+            const manualListInput = document.getElementById('releaseListInput');
+            const previewEl = document.getElementById('releaseListPreview');
+            if (!previewEl || !manualListInput) return;
+
+            const items = manualListInput.value
+                .split(',')
+                .map(item => item.trim())
+                .filter(item => item.length > 0);
+
+            if (items.length === 0) {
+                previewEl.textContent = '';
+                return;
+            }
+
+            previewEl.innerHTML = items.map(item => `<span class="release-chip">${escapeHtml(item)}</span>`).join('');
+        }
+
+        function saveReleaseGroup() {
+            const nameInput = document.getElementById('groupNameInput');
+            const manualListInput = document.getElementById('releaseListInput');
+            const name = (nameInput?.value || '').trim();
+            if (!name) {
+                    showErrorMessage('Please enter a group name');
+            }
+
+            // Determine selected releases
+            const checkboxes = document.querySelectorAll('.release-checkbox:checked');
+            const selectedFromCheckboxes = Array.from(checkboxes).map(cb => cb.value);
+            const manualListRaw = (manualListInput?.value || '')
+                .split(',')
+                .map(item => item.trim())
+                .filter(item => item.length > 0);
+            // Only keep manual entries that exist in the available FixVersions list
+            const available = getAvailableReleases();
+            const availableSet = new Set(available.map(a => a.toLowerCase()));
+            const manualList = manualListRaw.filter(item => availableSet.has(item.toLowerCase()));
+            const removedManual = manualListRaw.filter(item => !availableSet.has(item.toLowerCase()));
+
+            if (removedManual.length > 0) {
+                showSuccessMessage(`${removedManual.length} manual release(s) were ignored because they are not available in the FixVersions list.`);
+            }
+
+            const selected = Array.from(new Set([...selectedFromCheckboxes, ...manualList]));
+            if (selected.length === 0) {
+                showErrorMessage('Please select at least one release or enter a comma-separated list of available releases');
+                return;
+            }
+
+            const groups = loadReleaseGroups();
+            if (editingGroupIndex !== null && groups[editingGroupIndex]) {
+                // Update existing group: explicitly clear previous releases first
+                groups[editingGroupIndex].name = name;
+                groups[editingGroupIndex].releases = [];
+                groups[editingGroupIndex].updatedAt = new Date().toISOString();
+                // Persist the cleared state to ensure previous fixVersions are removed
+                try {
+                    localStorage.setItem(GROUPS_KEY, JSON.stringify(groups));
+                } catch (err) {
+                    console.warn('Could not persist cleared releases before update:', err);
+                }
+
+                // Now set the new selected releases and persist again
+                groups[editingGroupIndex].releases = selected;
+                groups[editingGroupIndex].updatedAt = new Date().toISOString();
+                showSuccessMessage(`Updated group '${name}' (${selected.length} release(s))`);
+            } else {
+                groups.push({ name, releases: selected, createdAt: new Date().toISOString() });
+                showSuccessMessage(`Saved group '${name}' with ${selected.length} release(s)`);
+            }
+
+            try {
+                const payload = JSON.stringify(groups);
+                localStorage.setItem(GROUPS_KEY, payload);
+                const verify = JSON.parse(localStorage.getItem(GROUPS_KEY) || '[]');
+                if (!Array.isArray(verify) || verify.length === 0) {
+                    throw new Error('Release groups were not persisted');
+                }
+            } catch (error) {
+                console.error('❌ Failed to save release groups:', error);
+                showErrorMessage('Failed to save release groups. Please check browser storage settings.');
+                return;
+            }
+            nameInput.value = '';
+            if (manualListInput) manualListInput.value = '';
+            updateReleaseListPreview();
+            // reset edit state
+            editingGroupIndex = null;
+            document.getElementById('saveGroupBtn').textContent = '💾 Save Group';
+            const cancelBtn = document.getElementById('cancelGroupEditBtn');
+            if (cancelBtn) cancelBtn.style.display = 'none';
+            displayReleaseGroups();
+            // Clear the Fix Versions list checkboxes
+            document.querySelectorAll('.release-checkbox').forEach(cb => cb.checked = false);
+            updateSelectedReleasesCount();
+            updateStorageInfo();
+        }
+
+        function displayReleaseGroups() {
+            const groups = loadReleaseGroups();
+            const container = document.getElementById('groupsList');
+            if (!container) return;
+
+            if (groups.length === 0) {
+                container.innerHTML = '<div style="color:#666;">No groups defined yet.</div>';
+                return;
+            }
+
+            // Sort groups alphabetically by name
+            const sortedGroups = groups.slice().sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+
+            container.innerHTML = sortedGroups.map((g, displayIdx) => {
+                // Find the original index in the unsorted array
+                const originalIdx = groups.findIndex(group => group.name === g.name && JSON.stringify(group.releases) === JSON.stringify(g.releases));
+                // Create releases details list
+                const releaseDetails = g.releases.map(r => escapeHtml(r)).join('<br>');
+                return `
+                    <div style="display:flex; align-items:flex-start; justify-content:space-between; padding:0.5rem 0; border-bottom:1px dashed #eee;">
+                        <div style="flex:1">
+                            <strong>${escapeHtml(g.name)}</strong>
+                            <div style="font-size:0.85rem; color:#666; margin-top:0.4rem; line-height:1.4;">${releaseDetails}</div>
+                        </div>
+                        <div style="display:flex; gap:0.5rem; margin-left:1rem;">
+                            <button class="btn btn-secondary" onclick="editReleaseGroup(${originalIdx})">Edit</button>
+                            <button class="btn btn-secondary" onclick="previewReleaseGroup(${originalIdx})">Preview</button>
+                            <button class="btn btn-danger" onclick="deleteReleaseGroup(${originalIdx})">Delete</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function deleteReleaseGroup(index) {
+            const groups = loadReleaseGroups();
+            if (!groups[index]) return;
+            if (!confirm(`Delete group '${groups[index].name}'?`)) return;
+            groups.splice(index, 1);
+            localStorage.setItem(GROUPS_KEY, JSON.stringify(groups));
+            displayReleaseGroups();
+            showSuccessMessage('Group deleted');
+        }
+
+        function previewReleaseGroup(index) {
+            const groups = loadReleaseGroups();
+            const group = groups[index];
+            if (!group) return;
+            showSuccessMessage(`Group '${group.name}' contains:\n\n` + group.releases.join('\n'));
+        }
+
+        function releasesLoaded() {
+            const releasesList = document.getElementById('releasesList');
+            return !!releasesList && releasesList.querySelectorAll('.release-checkbox').length > 0;
+        }
+
+        function getAvailableReleases() {
+            // Returns an array of release values from the FixVersions list
+            const checkboxes = document.querySelectorAll('.release-checkbox');
+            return Array.from(checkboxes).map(cb => cb.value);
+        }
+
+        async function editReleaseGroup(index) {
+            const groups = loadReleaseGroups();
+            const group = groups[index];
+            if (!group) return;
+
+            if (!releasesLoaded()) {
+                await loadReleasesFromAllProjectGroups();
+            }
+
+            if (!releasesLoaded()) {
+                showErrorMessage('Releases are not loaded yet. Please load releases and try again.');
+                return;
+            }
+
+            editingGroupIndex = index;
+            const nameInput = document.getElementById('groupNameInput');
+            const manualListInput = document.getElementById('releaseListInput');
+            nameInput.value = group.name;
+            if (manualListInput) {
+                manualListInput.value = group.releases.join(', ');
+            }
+            updateReleaseListPreview();
+
+            // Ensure releases list is visible and check appropriate checkboxes
+            const container = document.getElementById('releasesContainer');
+            if (container) container.style.display = 'block';
+
+            // Uncheck all then check only available group releases
+            const checkboxes = document.querySelectorAll('.release-checkbox');
+            const available = getAvailableReleases();
+            const availableSet = new Set(available.map(a => a.toLowerCase()));
+
+            // Filter group's releases to only include available ones
+            const originalReleases = Array.isArray(group.releases) ? group.releases.slice() : [];
+            const filtered = originalReleases.filter(r => availableSet.has((r || '').toLowerCase()));
+            const removed = originalReleases.filter(r => !availableSet.has((r || '').toLowerCase()));
+
+            if (removed.length > 0) {
+                showSuccessMessage(`${removed.length} release(s) removed because they are not available in the FixVersions list.`);
+                // persist the filtered releases immediately so edit reflects current state
+                const groups = loadReleaseGroups();
+                if (groups[index]) {
+                    groups[index].releases = filtered;
+                    groups[index].updatedAt = new Date().toISOString();
+                    localStorage.setItem(GROUPS_KEY, JSON.stringify(groups));
+                }
+            }
+
+            // Now check checkboxes for filtered releases
+            const releaseSet = new Set(filtered.map(r => r.toLowerCase()));
+            checkboxes.forEach(cb => {
+                const val = (cb.value || '').toLowerCase();
+                cb.checked = releaseSet.has(val);
+            });
+
+            // Put filtered releases into manual list input so UI shows the actual releases being edited
+            if (manualListInput) manualListInput.value = filtered.join(', ');
+
+            // Attach handlers, reorder and update UI
+            attachReleaseCheckboxHandlers();
+            reorderReleasesList();
+            updateSelectedReleasesCount();
+
+            // Toggle Save/Cancel UI
+            const saveBtn = document.getElementById('saveGroupBtn');
+            if (saveBtn) saveBtn.textContent = 'Update Group';
+            const cancelBtn = document.getElementById('cancelGroupEditBtn');
+            if (cancelBtn) cancelBtn.style.display = '';
+            // Scroll groups area into view
+            document.getElementById('groupsList')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function cancelReleaseGroupEdit() {
+            editingGroupIndex = null;
+            const nameInput = document.getElementById('groupNameInput');
+            const manualListInput = document.getElementById('releaseListInput');
+            if (nameInput) nameInput.value = '';
+            if (manualListInput) manualListInput.value = '';
+            updateReleaseListPreview();
+            const saveBtn = document.getElementById('saveGroupBtn');
+            if (saveBtn) saveBtn.textContent = '💾 Save Group';
+            const cancelBtn = document.getElementById('cancelGroupEditBtn');
+            if (cancelBtn) cancelBtn.style.display = 'none';
+            // Optionally uncheck all releases
+            document.querySelectorAll('.release-checkbox').forEach(cb => cb.checked = false);
+            updateSelectedReleasesCount();
+        }
+
+        // Throughput Ranges Management
+        function loadCountRanges() {
+            try {
+                return JSON.parse(localStorage.getItem(COUNT_RANGES_KEY) || '[]');
+            } catch (error) {
+                console.warn('Invalid count ranges data in localStorage. Resetting.', error);
+                localStorage.removeItem(COUNT_RANGES_KEY);
+                return [];
+            }
+        }
+
+        function loadSpRanges() {
+            try {
+                return JSON.parse(localStorage.getItem(SP_RANGES_KEY) || '[]');
+            } catch (error) {
+                console.warn('Invalid SP ranges data in localStorage. Resetting.', error);
+                localStorage.removeItem(SP_RANGES_KEY);
+                return [];
+            }
+        }
+
+        function loadKickRanges() {
+            try {
+                return JSON.parse(localStorage.getItem(KICK_RANGES_KEY) || '[]');
+            } catch (error) {
+                console.warn('Invalid kick ranges data in localStorage. Resetting.', error);
+                localStorage.removeItem(KICK_RANGES_KEY);
+                return [];
+            }
+        }
+
+        function saveRangesToStorage(key, ranges, label) {
+            try {
+                localStorage.setItem(key, JSON.stringify(ranges));
+                const verified = JSON.parse(localStorage.getItem(key) || '[]');
+                if (verified.length !== ranges.length) {
+                    console.warn(`Saved ${label} count mismatch. Expected ${ranges.length}, got ${verified.length}.`);
+                }
+                return true;
+            } catch (error) {
+                console.error(`Failed to save ${label} to localStorage:`, error);
+                showErrorMessage(`Could not save ${label}. Please check browser storage settings.`);
+                return false;
+            }
+        }
+
+        function addCountRange() {
+            const minInput = document.getElementById('countRangeMinInput');
+            const maxInput = document.getElementById('countRangeMaxInput');
+            const colorInput = document.getElementById('countRangeColorInput');
+            
+            const min = parseFloat(minInput?.value || '0');
+            const max = parseFloat(maxInput?.value || '');
+            const color = colorInput?.value || '#4CAF50';
+
+            if (!Number.isFinite(min) || !Number.isFinite(max)) {
+                showErrorMessage('Please enter valid min and max values');
+                return;
+            }
+
+            if (min > max) {
+                showErrorMessage('Min value must be less than or equal to Max value');
+                return;
+            }
+
+            const ranges = loadCountRanges();
+            ranges.push({ min, max, color });
+            ranges.sort((a, b) => a.min - b.min);
+            if (!saveRangesToStorage(COUNT_RANGES_KEY, ranges, 'Count ranges')) {
+                return;
+            }
+            
+            minInput.value = '';
+            maxInput.value = '';
+            colorInput.value = '#4CAF50';
+            displayCountRanges();
+            showSuccessMessage('Count range added');
+            updateStorageInfo();
+        }
+
+        function addSpRange() {
+            const minInput = document.getElementById('spRangeMinInput');
+            const maxInput = document.getElementById('spRangeMaxInput');
+            const colorInput = document.getElementById('spRangeColorInput');
+            
+            const min = parseFloat(minInput?.value || '0');
+            const max = parseFloat(maxInput?.value || '');
+            const color = colorInput?.value || '#2196F3';
+
+            if (!Number.isFinite(min) || !Number.isFinite(max)) {
+                showErrorMessage('Please enter valid min and max values');
+                return;
+            }
+
+            if (min > max) {
+                showErrorMessage('Min value must be less than or equal to Max value');
+                return;
+            }
+
+            const ranges = loadSpRanges();
+            ranges.push({ min, max, color });
+            ranges.sort((a, b) => a.min - b.min);
+            if (!saveRangesToStorage(SP_RANGES_KEY, ranges, 'SP ranges')) {
+                return;
+            }
+            
+            minInput.value = '';
+            maxInput.value = '';
+            colorInput.value = '#2196F3';
+            displaySpRanges();
+            showSuccessMessage('SP range added');
+            updateStorageInfo();
+        }
+
+        function addKickRange() {
+            const minInput = document.getElementById('kickRangeMinInput');
+            const maxInput = document.getElementById('kickRangeMaxInput');
+            const colorInput = document.getElementById('kickRangeColorInput');
+
+            const min = parseFloat(minInput?.value || '0');
+            const max = parseFloat(maxInput?.value || '');
+            const color = colorInput?.value || '#f59e0b';
+
+            if (!Number.isFinite(min) || !Number.isFinite(max)) {
+                showErrorMessage('Please enter valid min and max values');
+                return;
+            }
+
+            if (min > max) {
+                showErrorMessage('Min value must be less than or equal to Max value');
+                return;
+            }
+
+            const ranges = loadKickRanges();
+            ranges.push({ min, max, color });
+            ranges.sort((a, b) => a.min - b.min);
+            if (!saveRangesToStorage(KICK_RANGES_KEY, ranges, 'Kick ranges')) {
+                return;
+            }
+
+            minInput.value = '';
+            maxInput.value = '';
+            colorInput.value = '#f59e0b';
+            displayKickRanges();
+            showSuccessMessage('Kick ratio range added');
+            updateStorageInfo();
+        }
+
+        function displayCountRanges() {
+            const ranges = loadCountRanges();
+            const container = document.getElementById('countRangesList');
+            if (!container) return;
+
+            if (ranges.length === 0) {
+                container.innerHTML = '<div style="color:#999; font-size:0.9rem;">No ranges defined yet.</div>';
+                return;
+            }
+
+            container.innerHTML = ranges.map((range, idx) => `
+                <div style="display:flex; align-items:center; justify-content:space-between; padding:0.5rem 0.75rem; background:white; border-radius:6px; border:1px solid #ddd; margin-bottom:0.5rem;">
+                    <div style="display:flex; align-items:center; gap:1rem; flex:1;">
+                        <div style="width:40px; height:40px; background-color:${escapeHtml(range.color)}; border-radius:6px; border:1px solid #999;"></div>
+                        <div>
+                            <strong>${range.min.toFixed(2)}</strong> to <strong>${range.max.toFixed(2)}</strong>
+                        </div>
+                    </div>
+                    <button class="btn btn-danger" onclick="deleteCountRange(${idx})" style="padding:0.35rem 0.75rem; font-size:0.85rem;">Delete</button>
+                </div>
+            `).join('');
+        }
+
+        function displaySpRanges() {
+            const ranges = loadSpRanges();
+            const container = document.getElementById('spRangesList');
+            if (!container) return;
+
+            if (ranges.length === 0) {
+                container.innerHTML = '<div style="color:#999; font-size:0.9rem;">No ranges defined yet.</div>';
+                return;
+            }
+
+            container.innerHTML = ranges.map((range, idx) => `
+                <div style="display:flex; align-items:center; justify-content:space-between; padding:0.5rem 0.75rem; background:white; border-radius:6px; border:1px solid #ddd; margin-bottom:0.5rem;">
+                    <div style="display:flex; align-items:center; gap:1rem; flex:1;">
+                        <div style="width:40px; height:40px; background-color:${escapeHtml(range.color)}; border-radius:6px; border:1px solid #999;"></div>
+                        <div>
+                            <strong>${range.min.toFixed(2)}</strong> to <strong>${range.max.toFixed(2)}</strong>
+                        </div>
+                    </div>
+                    <button class="btn btn-danger" onclick="deleteSpRange(${idx})" style="padding:0.35rem 0.75rem; font-size:0.85rem;">Delete</button>
+                </div>
+            `).join('');
+        }
+
+        function displayKickRanges() {
+            const ranges = loadKickRanges();
+            const container = document.getElementById('kickRangesList');
+            if (!container) return;
+
+            if (ranges.length === 0) {
+                container.innerHTML = '<div style="color:#999; font-size:0.9rem;">No ranges defined yet.</div>';
+                return;
+            }
+
+            container.innerHTML = ranges.map((range, idx) => `
+                <div style="display:flex; align-items:center; justify-content:space-between; padding:0.5rem 0.75rem; background:white; border-radius:6px; border:1px solid #ddd; margin-bottom:0.5rem;">
+                    <div style="display:flex; align-items:center; gap:1rem; flex:1;">
+                        <div style="width:40px; height:40px; background-color:${escapeHtml(range.color)}; border-radius:6px; border:1px solid #999;"></div>
+                        <div>
+                            <strong>${range.min.toFixed(0)}%</strong> to <strong>${range.max.toFixed(0)}%</strong>
+                        </div>
+                    </div>
+                    <button class="btn btn-danger" onclick="deleteKickRange(${idx})" style="padding:0.35rem 0.75rem; font-size:0.85rem;">Delete</button>
+                </div>
+            `).join('');
+        }
+
+        function deleteCountRange(index) {
+            const ranges = loadCountRanges();
+            if (!ranges[index]) return;
+            if (!confirm('Delete this range?')) return;
+            ranges.splice(index, 1);
+            if (!saveRangesToStorage(COUNT_RANGES_KEY, ranges, 'Count ranges')) {
+                return;
+            }
+            displayCountRanges();
+            showSuccessMessage('Range deleted');
+            updateStorageInfo();
+        }
+
+        function deleteSpRange(index) {
+            const ranges = loadSpRanges();
+            if (!ranges[index]) return;
+            if (!confirm('Delete this range?')) return;
+            ranges.splice(index, 1);
+            if (!saveRangesToStorage(SP_RANGES_KEY, ranges, 'SP ranges')) {
+                return;
+            }
+            displaySpRanges();
+            showSuccessMessage('Range deleted');
+            updateStorageInfo();
+        }
+
+        function deleteKickRange(index) {
+            const ranges = loadKickRanges();
+            if (!ranges[index]) return;
+            if (!confirm('Delete this range?')) return;
+            ranges.splice(index, 1);
+            if (!saveRangesToStorage(KICK_RANGES_KEY, ranges, 'Kick ranges')) {
+                return;
+            }
+            displayKickRanges();
+            showSuccessMessage('Range deleted');
+            updateStorageInfo();
+        }
+    </script>
+</body>
+</html>
